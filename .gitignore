@@ -25,3 +25,7 @@ yarn-error.log*
 # environment variables
 .env
 backend/.env
+
+# SQLite temporary files (shared memory and write-ahead log)
+recipe_app.db-shm
+recipe_app.db-wal
