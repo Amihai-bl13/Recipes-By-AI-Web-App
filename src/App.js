@@ -71,7 +71,12 @@ function App() {
       setPrompt(''); // Clear prompt after submission
       setPlaceholder('Would you like to make any adjustments to the recipe or try something else?');
     } catch (err) {
-      alert('Failed to fetch recipe suggestion.');
+      // If the backend returned a “non‐cooking” error, show it
+      if (err.response && err.response.data && err.response.data.is_cooking_error) {
+        alert(err.response.data.error);
+      } else {
+        alert('Failed to fetch recipe suggestion.');
+      }
     } finally {
       setLoading(false);
     }
@@ -159,6 +164,22 @@ function App() {
     return sortOrder === 'latest' ? dateB - dateA : dateA - dateB;
   });
 
+  const handleClearHistory = async () => {
+    if (!window.confirm("Are you sure you want to clear your chat history? (This will delete all past messages except the initial system prompt.)")) {
+      return;
+    }
+    try {
+      await axios.post(`${API_URL}/clear_history`, {}, { withCredentials: true });
+      alert("Conversation history cleared.");
+      setRecipe('');
+      setPrompt('');
+      setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
+    } catch (error) {
+      console.error("Error clearing history:", error);
+      alert("Failed to clear history.");
+    }
+  };
+
   // Initial load and theme setup
   useEffect(() => {
     fetchUser();
@@ -191,9 +212,15 @@ function App() {
               {theme === 'light' ? <FaMoon /> : <FaSun />}
             </button>
             {user && (
-              <button className="logout-btn" onClick={handleLogout}>
-                Sign Out
-              </button>
+              <>
+                <button className="logout-btn" onClick={handleLogout}>
+                  Sign Out
+                </button>
+
+                <button className="logout-btn" onClick={handleClearHistory} style={{ marginLeft: '8px' }}>
+                  🗑️ Clear History
+                </button>
+              </>
             )}
           </div>
           <h1 className="logo">🍳 AI Recipe Chef</h1>

@@ -7,6 +7,12 @@ import os
 import requests
 from datetime import datetime
 import traceback
+import sys
+
+# Add the parent directory to the path to import database module
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+from database.models import DatabaseManager
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Used for session encryption
@@ -18,9 +24,8 @@ load_dotenv()
 GOOGLE_CLIENT_ID    = os.getenv("GOOGLE_CLIENT_ID")
 OPENROUTER_API_KEY  = os.getenv("OPENROUTER_API_KEY")  # get yours at https://openrouter.ai
 
-# In-memory stores
-users = {}
-histories = {}  # per-user conversation history
+# Initialize database with new path (recipe-app/database instead of recipe-app/backend/database)
+db = DatabaseManager("../database/recipe_app.db")
 
 @app.route("/login/google", methods=["POST"])
 def login_with_google():
@@ -34,55 +39,26 @@ def login_with_google():
             GOOGLE_CLIENT_ID
         )
 
-        userid = idinfo["sub"]
-        if userid not in users:
-            # New user
-            users[userid] = {
-                "email":   idinfo["email"],
-                "name":    idinfo.get("name", ""),
-                "picture": idinfo.get("picture", ""),
-                "favorites": []  # Initialize favorites for new users
-            }
-        else:
-            # Existing user - update info but preserve favorites
-            existing_favorites = users[userid].get("favorites", [])
-            users[userid]["email"] = idinfo["email"]
-            users[userid]["name"] = idinfo.get("name", "")
-            users[userid]["picture"] = idinfo.get("picture", "")
-            users[userid]["favorites"] = existing_favorites
-        # Initialize history for this user
-        histories[userid] = [
-            {
-                "role": "system",
-                "content": """You're a helpful chef who suggests great recipes. Please follow these rules:
+        google_id = idinfo["sub"]
+        email = idinfo["email"]
+        name = idinfo.get("name", "")
+        picture = idinfo.get("picture", "")
 
-                            FORMATTING RULES:
-                            - Format your title as `<h3>Recipe Name</h3>`.
-                            - Use `<h4>` for section headers (e.g. Ingredients, Instructions).
-                            - Wrap ingredients in `<ul><li>…</li></ul>`.
-                            - Wrap steps in `<ol><li>…</li></ol>`.
-                            - Add a `<br><br>` after the instructions list and before any final comments or serving suggestions
-                            - Avoid excessive `<br>`—only between logical sections.
-                            - Center‐align content visually (CSS will handle it).
-                            - Keep paragraphs tight with minimal blank lines.
-
-                            CONTENT RULES:
-                            - Start directly with the recipe title - no introductory text like "Here's a recipe" or "Great choice"
-                            - End with the recipe instructions followed by any serving suggestions or tips
-                            - Do not include any buttons or interactive elements in your response
-                            - Do not add disclaimers about code optimization or mobile viewing
-                            - Focus purely on the recipe content: title, ingredients, cooking instructions, and serving tips
-                            - Keep the response clean and recipe-focused only
-
-                            Respond with clean, compact HTML so it displays neatly in our app.
-                            """,
-            }
-        ]
+        # Create or update user in database
+        user = db.create_or_update_user(google_id, email, name, picture)
 
         # Save user in session
-        session["user_id"] = userid
+        session["user_id"] = user["id"]
+        session["google_id"] = google_id
 
-        return jsonify({"message": "Login successful", "user": users[userid]})
+        return jsonify({
+            "message": "Login successful", 
+            "user": {
+                "email": user["email"],
+                "name": user["name"],
+                "picture": user["picture"]
+            }
+        })
     except Exception as e:
         print("Google login error:")
         traceback.print_exc()
@@ -90,17 +66,27 @@ def login_with_google():
 
 @app.route("/logout", methods=["POST"])
 def logout():
-    uid = session.pop("user_id", None)
-    if uid and uid in histories:
-        histories.pop(uid, None)
+    session.pop("user_id", None)
+    session.pop("google_id", None)
     return jsonify({"message": "Logged out successfully"})
 
 @app.route("/me", methods=["GET"])
 def me():
-    uid = session.get("user_id")
-    if not uid or uid not in users:
+    user_id = session.get("user_id")
+    google_id = session.get("google_id")
+    
+    if not user_id or not google_id:
         return jsonify({"error": "Not logged in"}), 401
-    return jsonify(users[uid])
+    
+    user = db.get_user_by_google_id(google_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    return jsonify({
+        "email": user["email"],
+        "name": user["name"],
+        "picture": user["picture"]
+    })
 
 @app.route("/suggest_recipe", methods=["POST", "OPTIONS"])
 def suggest_recipe():
@@ -108,18 +94,21 @@ def suggest_recipe():
     if request.method == "OPTIONS":
         return make_response(("", 200))
 
-    uid = session.get("user_id")
-    if not uid or uid not in users:
+    user_id = session.get("user_id")
+    if not user_id:
         return jsonify({"error": "Not logged in"}), 401
 
-    data    = request.get_json() or {}
+    data = request.get_json() or {}
     message = data.get("message", "")
 
-    # Append user message to history
-    histories.setdefault(uid, [{"role": "system", "content": "You're a helpful chef who suggests great recipes."}])
-    histories[uid].append({"role": "user", "content": message})
+    # Get conversation history from database
+    conversation_history = db.get_conversation_history(user_id)
+    
+    # Add user message to history
+    db.add_conversation_message(user_id, "user", message)
+    conversation_history.append({"role": "user", "content": message})
 
-    # Call OpenRouter API with full conversation history
+    # Call OpenRouter API with conversation history
     try:
         headers = {
             "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -128,7 +117,7 @@ def suggest_recipe():
         }
         payload = {
             "model":    "mistralai/mistral-7b-instruct",
-            "messages": histories[uid]
+            "messages": conversation_history
         }
 
         resp = requests.post(
@@ -141,8 +130,31 @@ def suggest_recipe():
         jr = resp.json()
         reply = jr.get("choices", [])[0].get("message", {}).get("content", "").strip()
 
-        # Append assistant reply to history
-        histories[uid].append({"role": "assistant", "content": reply})
+        # Check if the AI is refusing to help with non-cooking topics
+        non_cooking_indicators = [
+            "I can only help with cooking",
+            "I'm a cooking assistant",
+            "Please ask me about ingredients",
+            "cooking and recipe suggestions"
+        ]
+        
+        is_non_cooking_response = any(indicator in reply for indicator in non_cooking_indicators)
+        
+        if is_non_cooking_response:
+            # Extract just the first sentence (up to first period or newline)
+            # This ensures we drop any recipe text that follows.
+            # Find the earliest break (newline or period)
+            first_line = reply.split("\n")[0]
+            if "." in first_line:
+                # Keep everything through the first period.
+                refusal_msg = first_line.split(".", 1)[0].strip() + "."
+            else:
+                refusal_msg = first_line.strip()
+
+            return jsonify({"error": refusal_msg, "is_cooking_error": True}), 400
+
+        # Add assistant reply to database
+        db.add_conversation_message(user_id, "assistant", reply)
 
         return jsonify({"recipe": reply})
 
@@ -153,14 +165,19 @@ def suggest_recipe():
 
 @app.route("/favorites", methods=["GET", "POST", "DELETE"])
 def manage_favorites():
-    uid = session.get("user_id")
-    if not uid or uid not in users:
+    user_id = session.get("user_id")
+    if not user_id:
         return jsonify({"error": "Not logged in"}), 401
     
     if request.method == "GET":
-        # Return user's favorite recipes
-        user_favorites = users[uid].get("favorites", [])
-        return jsonify({"favorites": user_favorites})
+        # Return user's favorite recipes from database
+        try:
+            favorites = db.get_user_favorites(user_id)
+            return jsonify({"favorites": favorites})
+        except Exception as e:
+            print("Error getting favorites:")
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
     
     elif request.method == "POST":
         # Add a recipe to favorites
@@ -171,39 +188,53 @@ def manage_favorites():
         if not recipe_content:
             return jsonify({"error": "No recipe content provided"}), 400
         
-        # Initialize favorites if not exists
-        if "favorites" not in users[uid]:
-            users[uid]["favorites"] = []
-
-        # Check for duplicate content
-        for existing_recipe in users[uid]["favorites"]:
-            if existing_recipe["content"] == recipe_content:
-                return jsonify({"error": "This recipe is already in your favorites!"}), 409
-        
-        favorite_recipe = {
-            "id": len(users[uid]["favorites"]) + 1,
-            "title": recipe_title,
-            "content": recipe_content,
-            "date_added": datetime.now().isoformat(),
-            "starred": True
-        }
-        
-        users[uid]["favorites"].append(favorite_recipe)
-        return jsonify({"message": "Recipe starred successfully", "recipe": favorite_recipe})
+        try:
+            favorite_recipe = db.add_favorite_recipe(user_id, recipe_title, recipe_content)
+            return jsonify({"message": "Recipe starred successfully", "recipe": favorite_recipe})
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 409
+        except Exception as e:
+            print("Error adding favorite:")
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
     
     elif request.method == "DELETE":
         # Remove a recipe from favorites
         data = request.get_json() or {}
         recipe_id = data.get("recipe_id")
         
-        if "favorites" in users[uid]:
-            users[uid]["favorites"] = [r for r in users[uid]["favorites"] if r["id"] != recipe_id]
+        if not recipe_id:
+            return jsonify({"error": "Recipe ID is required"}), 400
         
-        return jsonify({"message": "Recipe removed from favorites"})
+        try:
+            success = db.remove_favorite_recipe(user_id, recipe_id)
+            if success:
+                return jsonify({"message": "Recipe removed from favorites"})
+            else:
+                return jsonify({"error": "Recipe not found or not owned by user"}), 404
+        except Exception as e:
+            print("Error removing favorite:")
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+@app.route("/clear_history", methods=["POST"])
+def clear_conversation_history():
+    """Clear conversation history for the current user (except system messages)"""
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Not logged in"}), 401
+    
+    try:
+        db.clear_conversation_history(user_id)
+        return jsonify({"message": "Conversation history cleared successfully"})
+    except Exception as e:
+        print("Error clearing history:")
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/", methods=["GET"])
 def index():
-    return "Backend is running with conversational OpenRouter!"
+    return "Backend is running with SQLite database and conversational OpenRouter!"
 
 if __name__ == "__main__":
     app.run(debug=True)
