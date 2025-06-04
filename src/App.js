@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { FaSun, FaMoon } from "react-icons/fa";
 import "./App.css";
+import bellSound from './assets/bellSound.mp3';
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const API_URL = "http://localhost:5000";
@@ -18,6 +19,19 @@ function App() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [sortOrder, setSortOrder] = useState('latest'); // 'latest' or 'oldest'
   const [placeholder, setPlaceholder] = useState(null);
+
+  // Timer states
+  const [showTimer, setShowTimer] = useState(false);
+  const [timerMinutes, setTimerMinutes] = useState('');
+  const [timerSeconds, setTimerSeconds] = useState('');
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [timerFinished, setTimerFinished] = useState(false);
+  const timerIntervalRef = useRef(null);
+  const audioRef = useRef(null);
+  const [timerPosition, setTimerPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   const handleLoginSuccess = async (credentialResponse) => {
     const token = credentialResponse.credential;
@@ -180,6 +194,71 @@ function App() {
     }
   };
 
+  // Timer functions
+  const startTimer = () => {
+    // Only set time from inputs if timer is at 0 (fresh start)
+    if (timeLeft === 0) {
+      const minutes = parseInt(timerMinutes) || 0;
+      const seconds = parseInt(timerSeconds) || 0;
+      const totalSeconds = minutes * 60 + seconds;
+      
+      if (totalSeconds <= 0) {
+        alert('Please enter a valid time');
+        return;
+      }
+      
+      setTimeLeft(totalSeconds);
+    }
+    
+    // Just resume the timer with current timeLeft
+    setIsTimerRunning(true);
+    setTimerFinished(false);
+  };
+
+  const pauseTimer = () => {
+    setIsTimerRunning(false);
+  };
+
+  const resetTimer = () => {
+    setIsTimerRunning(false);
+    setTimeLeft(0);
+    setTimerFinished(false);
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleTimerMouseDown = (e) => {
+    setIsDragging(true);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+    
+    // Set the current position based on where the timer actually is
+    setTimerPosition({
+      x: rect.left,
+      y: rect.top
+    });
+  };
+
+  const handleTimerMouseMove = (e) => {
+    if (!isDragging) return;
+    
+    setTimerPosition({
+      x: e.clientX - dragOffset.x,
+      y: e.clientY - dragOffset.y
+    });
+  };
+
+  const handleTimerMouseUp = () => {
+    setIsDragging(false);
+  };
+
   // Initial load and theme setup
   useEffect(() => {
     fetchUser();
@@ -192,6 +271,61 @@ function App() {
       fetchFavorites();
     }
   }, [user]); // Only depends on user
+
+  // Timer effect
+  useEffect(() => {
+    if (isTimerRunning && timeLeft > 0) {
+      timerIntervalRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            setIsTimerRunning(false);
+            setTimerFinished(true);
+            // Play sound
+            if (audioRef.current) {
+              audioRef.current.play().catch(e => console.log('Audio play failed:', e));
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    }
+
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
+  }, [isTimerRunning, timeLeft]);
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleTimerMouseMove);
+      document.addEventListener('mouseup', handleTimerMouseUp);
+    } else {
+      document.removeEventListener('mousemove', handleTimerMouseMove);
+      document.removeEventListener('mouseup', handleTimerMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleTimerMouseMove);
+      document.removeEventListener('mouseup', handleTimerMouseUp);
+    };
+  }, [isDragging, dragOffset]);
+
+  useEffect(() => {
+    if (timerFinished) {
+      const timeout = setTimeout(() => {
+        setTimerFinished(false);
+      }, 3000); // Animation duration: 1s * 3 iterations
+
+      return () => clearTimeout(timeout);
+    }
+  }, [timerFinished]);
 
   // Floating shapes component
   const FloatingShapes = () => (
@@ -222,10 +356,80 @@ function App() {
                 </button>
               </>
             )}
+            {user && (<button className="timer-toggle-btn" onClick={() => setShowTimer(!showTimer)}>
+              ⏰
+            </button>)}
           </div>
           <h1 className="logo">🍳 AI Recipe Chef</h1>
           <p className="tagline">Culinary magic at your fingertips</p>
         </header>
+
+        {showTimer && (
+          <div 
+            className={`floating-timer ${timerFinished ? 'timer-finished' : ''} ${isDragging ? 'dragging' : ''}`}
+            style={{
+              ...(timerPosition.x !== 0 || timerPosition.y !== 0 
+                ? {
+                    left: `${timerPosition.x}px`,
+                    top: `${timerPosition.y}px`,
+                    right: 'auto'
+                  }
+                : {
+                    top: '120px',
+                    right: '20px'
+                  }
+              )
+            }}
+            onMouseDown={handleTimerMouseDown}
+          >
+            <div className="timer-header">
+              <span>⏰ Kitchen Timer</span>
+              <button className="timer-close" onClick={() => setShowTimer(false)}>×</button>
+            </div>
+            
+            {timeLeft === 0 && !isTimerRunning ? (
+              <div className="timer-setup">
+                <div className="time-inputs">
+                  <input
+                    type="number"
+                    placeholder="MM"
+                    value={timerMinutes}
+                    onChange={(e) => setTimerMinutes(e.target.value)}
+                    min="0"
+                    max="59"
+                  />
+                  <span>:</span>
+                  <input
+                    type="number"
+                    placeholder="SS"
+                    value={timerSeconds}
+                    onChange={(e) => setTimerSeconds(e.target.value)}
+                    min="0"
+                    max="59"
+                  />
+                </div>
+                <button className="timer-start-btn" onClick={startTimer}>
+                  Start Timer
+                </button>
+              </div>
+            ) : (
+              <div className="timer-display">
+                <div className="timer-time">{formatTime(timeLeft)}</div>
+                  <div className="timer-controls">
+                    <button onClick={isTimerRunning ? pauseTimer : startTimer}>
+                      {isTimerRunning ? '⏸️' : (timeLeft > 0 ? '▶️' : '▶️')}
+                    </button>
+                    <button onClick={resetTimer}>🔄</button>
+                  </div>
+                {timerFinished && <div className="timer-alert">⏰ Time's Up!</div>}
+              </div>
+            )}
+            
+            <audio ref={audioRef} preload="auto">
+              <source src={bellSound} type="audio/mp3" />
+            </audio>
+          </div>
+        )}
 
         {!user ? (
           <div className="login-area">
