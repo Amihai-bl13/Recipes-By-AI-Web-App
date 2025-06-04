@@ -74,7 +74,7 @@ function App() {
       return;
     }
     setLoading(true);
-    setRecipe('');
+    //setRecipe('');
     try {
       const res = await axios.post(
         `${API_URL}/suggest_recipe`,
