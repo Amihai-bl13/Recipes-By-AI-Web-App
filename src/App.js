@@ -117,6 +117,15 @@ function App() {
     }
   };
 
+  const clearRecipe = async () => {
+    if (!window.confirm("Are you sure you want to clear the current recipe?")) {
+      return;
+    }
+    setRecipe('');
+    setPrompt('');
+    setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
+  }
+
   const starRecipe = async () => {
     if (!recipe) return;
     
@@ -489,7 +498,7 @@ function App() {
                           <button onClick={() => setSelectedRecipe(selectedRecipe?.id === fav.id ? null : fav)}>
                             {selectedRecipe?.id === fav.id ? '👁️ Hide' : '👁️ View'}
                           </button>
-                          <button onClick={() => removeFromFavorites(fav.id)}>🗑️</button>
+                          <button onClick={() => removeFromFavorites(fav.id)}>🗑️ Delete</button>
                         </div>
                       </div>
                     ))}
@@ -530,6 +539,9 @@ function App() {
             {recipe && (
               <div className="recipe-result">
                 <div className="recipe-header">
+                  <button className="clear-btn" onClick={clearRecipe}>
+                    ♻ Clear Recipe
+                  </button>
                   <h2 className="result-title">
                     <span>✨</span>
                     <span>Your Personalized Recipe</span>

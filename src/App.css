@@ -552,6 +552,11 @@ body::before {
   right: 0;
 }
 
+.recipe-header .clear-btn {
+  position: absolute;
+  left: 0;
+}
+
 .star-btn {
   background: linear-gradient(135deg, #ffd700, #ffed4a);
   color: #333;
@@ -562,11 +567,30 @@ body::before {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-family: inherit;
 }
 
 .star-btn:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
+.clear-btn {
+  background: linear-gradient(135deg, #e0e0e0, #bdbdbd);
+  color: #333;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.clear-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(189, 189, 189, 0.4);
 }
 
 .favorites-section {
