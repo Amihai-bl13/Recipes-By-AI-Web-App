@@ -1,0 +1,27 @@
+/* LoginArea.css */
+
+.login-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40vh;
+}
+
+.login-card {
+  text-align: center;
+  padding: 60px 40px;
+}
+
+.login-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.login-subtitle {
+  color: white;
+  margin-bottom: 40px;
+  font-size: 1.1rem;
+}

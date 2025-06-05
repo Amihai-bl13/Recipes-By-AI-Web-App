@@ -1,0 +1,236 @@
+// UserDashboard.js
+import React, { useEffect } from 'react';
+import axios from 'axios';
+
+import './UserDashboard.css';
+
+/* Import sub-components */
+import FavoritesSection from '../FavoritesSection/FavoritesSection';
+import RecipeResult from '../RecipeResult/RecipeResult';
+
+export default function UserDashboard({
+  user,
+  prompt,
+  setPrompt,
+  recipe,
+  setRecipe,
+  loading,
+  setLoading,
+  placeholder,
+  setPlaceholder,
+  favorites,
+  setFavorites,
+  showFavorites,
+  setShowFavorites,
+  selectedRecipe,
+  setSelectedRecipe,
+  sortOrder,
+  setSortOrder,
+  handleLogout
+}) {
+  const API_URL = "http://localhost:5000";
+
+  // --------------------
+  //  HANDLE PROMPT SUBMIT
+  // --------------------
+  const handleSubmitPrompt = async () => {
+    if (!prompt.trim()) {
+      alert('Please enter a prompt or ingredients to suggest a recipe.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await axios.post(
+        `${API_URL}/suggest_recipe`,
+        { message: prompt },
+        { withCredentials: true }
+      );
+      setRecipe(res.data.recipe);
+      setPrompt('');
+      setPlaceholder("Would you like to make any adjustments to the recipe or try something else?");
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.is_cooking_error) {
+        alert(err.response.data.error);
+      } else {
+        alert('Failed to fetch recipe suggestion.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --------------------
+  //  FETCH / STAR / REMOVE FAVORITES
+  // --------------------
+  const fetchFavorites = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/favorites`, { withCredentials: true });
+      setFavorites(res.data.favorites || []);
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+    }
+  };
+
+  const clearRecipe = () => {
+    if (!window.confirm("Are you sure you want to clear the current recipe?")) {
+      return;
+    }
+    setRecipe('');
+    setPrompt('');
+    setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
+  };
+
+  const starRecipe = async () => {
+    if (!recipe) return;
+
+    // Extract a reasonable title from the HTML string:
+    let title = 'Untitled Recipe';
+    const h3Match = recipe.match(/<h3[^>]*>(.*?)<\/h3>/i);
+    if (h3Match) {
+      title = h3Match[1].replace(/<[^>]*>/g, '').trim();
+    } else {
+      const textBeforeStructure = recipe.split(/<h4|<ul|<ol/)[0];
+      const lines = textBeforeStructure.split(/\n|<br\s*\/?>/);
+      for (let i = lines.length - 1; i >= 0; i--) {
+        const cleanLine = lines[i].replace(/<[^>]*>/g, '').trim();
+        if (
+          cleanLine &&
+          !cleanLine.toLowerCase().includes("here's") &&
+          !cleanLine.toLowerCase().includes('recipe') &&
+          cleanLine.length > 3 &&
+          cleanLine.length < 100
+        ) {
+          title = cleanLine;
+          break;
+        }
+      }
+    }
+
+    try {
+      await axios.post(
+        `${API_URL}/favorites`,
+        { recipe, title },
+        { withCredentials: true }
+      );
+      alert('Recipe starred successfully!');
+      fetchFavorites();
+    } catch (error) {
+      const errMsg = error.response?.data?.error || 'Failed to star recipe';
+      alert(errMsg);
+    }
+  };
+
+  const removeFromFavorites = async (recipeId) => {
+    try {
+      await axios.delete(
+        `${API_URL}/favorites`,
+        { data: { recipe_id: recipeId }, withCredentials: true }
+      );
+      setSelectedRecipe(null);
+      fetchFavorites();
+    } catch (error) {
+      alert('Failed to remove recipe from favorites');
+    }
+  };
+
+  // Sort favorites array into a new variable
+  const sortedFavorites = [...favorites].sort((a, b) => {
+    const dateA = new Date(a.date_added);
+    const dateB = new Date(b.date_added);
+    return sortOrder === 'latest' ? dateB - dateA : dateA - dateB;
+  });
+
+  // Fetch favorites when component mounts (and whenever user changes)
+  useEffect(() => {
+    if (user) {
+      fetchFavorites();
+    }
+  }, [user]);
+
+  // Listen for “clearHistory” event from Header (to invoke /clear_history)
+  useEffect(() => {
+    const onClearHistory = async () => {
+      if (!window.confirm("Are you sure you want to clear your chat history? (This will delete all past messages except the initial system prompt.)")) {
+        return;
+      }
+      try {
+        await axios.post(`${API_URL}/clear_history`, {}, { withCredentials: true });
+        alert("Conversation history cleared.");
+        setRecipe('');
+        setPrompt('');
+        setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
+      } catch (error) {
+        console.error("Error clearing history:", error);
+        alert("Failed to clear history.");
+      }
+    };
+
+    window.addEventListener('clearHistory', onClearHistory);
+    return () => window.removeEventListener('clearHistory', onClearHistory);
+  }, []);
+
+  // --------------------
+  //  HANDLERS FOR KEYBOARD SUBMIT
+  // --------------------
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && e.ctrlKey) {
+      handleSubmitPrompt();
+    }
+  };
+
+  return (
+    <div className="card user-dashboard-card">
+      <div className="user-info">
+        <img
+          src={
+            user.picture ||
+            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+          }
+          alt="profile"
+          className="avatar"
+        />
+        <div>
+          <div className="welcome">Hey, {user.name || 'Chef'}!</div>
+          <div className="subtext">What culinary adventure shall we embark on today?</div>
+        </div>
+      </div>
+
+      <FavoritesSection
+        favorites={favorites}
+        sortedFavorites={sortedFavorites}
+        showFavorites={showFavorites}
+        setShowFavorites={setShowFavorites}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
+        selectedRecipe={selectedRecipe}
+        setSelectedRecipe={setSelectedRecipe}
+        removeFromFavorites={removeFromFavorites}
+      />
+
+      <textarea
+        className="prompt-input"
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        rows="4"
+      />
+
+      <button
+        className="suggest-btn"
+        onClick={handleSubmitPrompt}
+        disabled={loading}
+      >
+        {loading ? '✨ Cooking...' : '🍽️ Create My Recipe'}
+      </button>
+
+      {recipe && (
+        <RecipeResult
+          recipe={recipe}
+          clearRecipe={clearRecipe}
+          starRecipe={starRecipe}
+        />
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,155 @@
+/* FavoritesSection.css */
+
+.favorites-section {
+  margin: 20px 0;
+}
+
+.favorites-toggle-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #4ecdc4, #44a08d);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 15px;
+}
+
+.favorites-toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
+}
+
+.favorites-container {
+  background: rgba(78, 205, 196, 0.05);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid rgba(78, 205, 196, 0.2);
+}
+
+.favorites-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.favorites-header h3 {
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.sort-btn {
+  background: rgba(78, 205, 196, 0.2);
+  color: var(--text-primary);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sort-btn:hover {
+  background: rgba(78, 205, 196, 0.3);
+}
+
+.favorites-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.favorite-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.favorite-info h4 {
+  margin: 0 0 4px 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.favorite-info small {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.favorite-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.favorite-actions button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+}
+
+.favorite-actions button:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.selected-recipe-inline {
+  margin-top: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+  border-radius: 16px;
+  border: 2px solid rgba(78, 205, 196, 0.3);
+  animation: slideDown 0.3s ease-out;
+  position: relative;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.exit-selected-recipe-btn {
+  background: rgba(255, 107, 107, 0.2);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.exit-selected-recipe-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: scale(1.1);
+}
+
+.selected-recipe-inline .recipe-text {
+  text-align: center;
+  margin: 0 auto;
+  max-width: 90%;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
