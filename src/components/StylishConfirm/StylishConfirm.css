@@ -5,12 +5,12 @@
   width: 100%;
   height: 100%;
   background: rgba(15, 15, 25, 0.85);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(3px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding-top: 0;
-  z-index: 9999;
+  padding-top: 80px;
+  z-index: 10000;
   animation: overlayFadeIn 0.3s ease-out;
 }
 
@@ -24,7 +24,7 @@
   min-width: 350px;
   text-align: center;
   position: relative;
-  animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: modalSlideInFromTop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: hidden;
   backdrop-filter: blur(10px);
 }
@@ -187,29 +187,29 @@
   }
 }
 
-@keyframes modalSlideIn {
+@keyframes modalSlideInFromTop {
   0% { 
     opacity: 0; 
-    transform: scale(0.7) translateY(-50px); 
+    transform: translateY(-100px) scale(0.8); 
   }
   50% { 
     opacity: 1; 
-    transform: scale(1.05) translateY(10px); 
+    transform: translateY(10px) scale(1.05); 
   }
   100% { 
     opacity: 1; 
-    transform: scale(1) translateY(0); 
+    transform: translateY(0) scale(1); 
   }
 }
 
-@keyframes modalSlideOut {
+@keyframes modalSlideOutToTop {
   0% { 
     opacity: 1; 
-    transform: scale(1) translateY(0); 
+    transform: translateY(0) scale(1); 
   }
   100% { 
     opacity: 0; 
-    transform: scale(0.8) translateY(-30px); 
+    transform: translateY(-80px) scale(0.8); 
   }
 }
 
@@ -225,7 +225,7 @@
 }
 
 .confirm-box.dismissing {
-  animation: modalSlideOut 0.25s ease-in forwards;
+  animation: modalSlideOutToTop 0.25s ease-in forwards;
 }
 
 .confirm-overlay.dismissing {
@@ -247,7 +247,7 @@
 }
 
 :root[data-theme='dark'] .confirm-btn.cancel {
-  background: linear-gradient(135deg, var(--text-secondary) 0%, rgba(226, 226, 226, 0.8) 100%);
+  background: linear-gradient(135deg, var(--text-secondary) 0%, rgba(162, 161, 161, 0.8) 100%);
   color: var(--text-primary);
 }
 
@@ -259,6 +259,7 @@
 @media (max-width: 768px) {
   .confirm-overlay {
     padding-top: 40px;
+    align-items: flex-start;
   }
   
   .confirm-box {

@@ -1,8 +1,8 @@
-import React from 'react';
 import './StylishConfirm.css';
+import ReactDOM from 'react-dom';
 
 export default function StylishConfirm({ message, onConfirm, onCancel }) {
-  return (
+  return ReactDOM.createPortal(
     <div className="confirm-overlay">
       <div className="confirm-box">
         <p className="confirm-message">{message}</p>
@@ -15,6 +15,7 @@ export default function StylishConfirm({ message, onConfirm, onCancel }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
