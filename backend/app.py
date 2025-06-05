@@ -104,8 +104,7 @@ def suggest_recipe():
     # Get conversation history from database
     conversation_history = db.get_conversation_history(user_id)
     
-    # Add user message to history
-    db.add_conversation_message(user_id, "user", message)
+    # Add user message to local history
     conversation_history.append({"role": "user", "content": message})
 
     # Call OpenRouter API with conversation history
@@ -151,7 +150,14 @@ def suggest_recipe():
             else:
                 refusal_msg = first_line.strip()
 
+            # Remove user message from local history
+            if conversation_history and conversation_history[-1]["role"] == "user":
+                conversation_history.pop()
+
             return jsonify({"error": refusal_msg, "is_cooking_error": True}), 400
+
+        # Add user message to db history
+        db.add_conversation_message(user_id, "user", message)
 
         # Add assistant reply to database
         db.add_conversation_message(user_id, "assistant", reply)
