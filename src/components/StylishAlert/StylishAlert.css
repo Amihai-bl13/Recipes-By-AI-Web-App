@@ -1,8 +1,8 @@
 .stylish-alert {
   position: fixed;
-  top: 30px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   background: var(--bg-gradient);
   color: var(--text-primary);
   padding: 16px 24px;
@@ -20,7 +20,7 @@
 }
 
 .stylish-alert:hover {
-  transform: translateX(-50%) translateY(-2px);
+  transform: translate(-50%, -50%) translateY(-2px);
   box-shadow: var(--shadow-hover);
 }
 
@@ -45,7 +45,8 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 1;
-  color: var(--text-primary);
+  color: white;
+  text-align:center;
 }
 
 .stylish-alert-close {
@@ -111,26 +112,26 @@
 @keyframes slideInBounce {
   0% { 
     opacity: 0; 
-    transform: translate(-50%, -100px) scale(0.8); 
+    transform: translate(-50%, -50%) scale(0.8) translateY(-30px); 
   }
   60% { 
     opacity: 1; 
-    transform: translate(-50%, 5px) scale(1.05); 
+    transform: translate(-50%, -50%) scale(1.05) translateY(5px); 
   }
   100% { 
     opacity: 1; 
-    transform: translate(-50%, 0) scale(1); 
+    transform: translate(-50%, -50%) scale(1); 
   }
 }
 
 @keyframes slideOut {
   0% { 
     opacity: 1; 
-    transform: translate(-50%, 0) scale(1); 
+    transform: translate(-50%, -50%) scale(1); 
   }
   100% { 
     opacity: 0; 
-    transform: translate(-50%, -50px) scale(0.9); 
+    transform: translate(-50%, -50%) scale(0.9) translateY(-30px); 
   }
 }
 
@@ -165,41 +166,42 @@
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .stylish-alert {
-    top: 20px;
-    left: 20px;
-    right: 20px;
-    transform: none;
-    max-width: none;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+    margin: 20px;
+    max-width: calc(100vw - 40px);
     min-width: auto;
   }
   
   .stylish-alert:hover {
-    transform: translateY(-2px);
+    transform: translate(-50%, -50%) translateY(-2px);
   }
   
   @keyframes slideInBounce {
     0% { 
       opacity: 0; 
-      transform: translateY(-100px) scale(0.8); 
+      transform: translate(-50%, -50%) scale(0.8) translateY(-30px); 
     }
     60% { 
       opacity: 1; 
-      transform: translateY(5px) scale(1.05); 
+      transform: translate(-50%, -50%) scale(1.05) translateY(5px); 
     }
     100% { 
       opacity: 1; 
-      transform: translateY(0) scale(1); 
+      transform: translate(-50%, -50%) scale(1); 
     }
   }
   
   @keyframes slideOut {
     0% { 
       opacity: 1; 
-      transform: translateY(0) scale(1); 
+      transform: translate(-50%, -50%) scale(1); 
     }
     100% { 
       opacity: 0; 
-      transform: translateY(-50px) scale(0.9); 
+      transform: translate(-50%, -50%) scale(0.9) translateY(-30px); 
     }
   }
 }
