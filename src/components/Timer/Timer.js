@@ -2,15 +2,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Timer.css';
 import bellSound from '../../assets/bellSound.mp3';
+import StylishAlert from '../StylishAlert/StylishAlert';
 
 export default function Timer({ setShowTimer }) {
   const [timerMinutes, setTimerMinutes] = useState('');
   const [timerSeconds, setTimerSeconds] = useState('');
+  const [timerHours, setTimerHours] = useState('');
   const [timeLeft, setTimeLeft] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerFinished, setTimerFinished] = useState(false);
   const timerIntervalRef = useRef(null);
   const audioRef = useRef(null);
+
+  const [alertMessage, setAlertMessage] = useState('');
+  const clearAlert = () => setAlertMessage('');
 
   // For dragging
   const [timerPosition, setTimerPosition] = useState({ x: 0, y: 0 });
@@ -22,11 +27,12 @@ export default function Timer({ setShowTimer }) {
   // --------------------
   const startTimer = () => {
     if (timeLeft === 0) {
+      const hours   = parseInt(timerHours, 10)   || 0;
       const minutes = parseInt(timerMinutes, 10) || 0;
       const seconds = parseInt(timerSeconds, 10) || 0;
-      const totalSeconds = minutes * 60 + seconds;
+      const totalSeconds = hours * 3600 + minutes * 60 + seconds;
       if (totalSeconds <= 0) {
-        alert('Please enter a valid time');
+        setAlertMessage('Please enter a valid time');
         return;
       }
       setTimeLeft(totalSeconds);
@@ -43,12 +49,16 @@ export default function Timer({ setShowTimer }) {
     setIsTimerRunning(false);
     setTimeLeft(0);
     setTimerFinished(false);
+    setTimerHours('');
+    setTimerMinutes('');
+    setTimerSeconds('');
   };
 
   const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
+    const hrs  = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   // Countdown effect
@@ -147,27 +157,59 @@ export default function Timer({ setShowTimer }) {
 
       {timeLeft === 0 && !isTimerRunning ? (
         <div className="timer-setup">
+          {/* HOURS (0-23) */}
           <div className="time-inputs">
+            <input
+              type="number"
+              placeholder="HH"
+              value={timerHours}
+              onChange={(e) => {
+                let v = parseInt(e.target.value, 10);
+                if (isNaN(v) || v < 0) v = 0;
+                if (v > 23) v = 23; // change this to your desired max
+                setTimerHours(v.toString());
+              }}
+              min="0"
+              max="23"
+            />
+            <span>:</span>
+
+            {/* MINUTES (0–59) */}
             <input
               type="number"
               placeholder="MM"
               value={timerMinutes}
-              onChange={(e) => setTimerMinutes(e.target.value)}
+              onChange={(e) => {
+                let v = parseInt(e.target.value, 10);
+                if (isNaN(v) || v < 0) v = 0;
+                if (v > 59) v = 59;
+                setTimerMinutes(v.toString());
+              }}
               min="0"
               max="59"
             />
             <span>:</span>
+
+            {/* SECONDS (0–59) */}
             <input
               type="number"
               placeholder="SS"
               value={timerSeconds}
-              onChange={(e) => setTimerSeconds(e.target.value)}
+              onChange={(e) => {
+                let v = parseInt(e.target.value, 10);
+                if (isNaN(v) || v < 0) v = 0;
+                if (v > 59) v = 59;
+                setTimerSeconds(v.toString());
+              }}
               min="0"
               max="59"
             />
           </div>
+          <button className="timer-reset-btn" onClick={resetTimer}>
+            Reset
+          </button>
           <button className="timer-start-btn" onClick={startTimer}>
-            Start Timer
+            Start
           </button>
         </div>
       ) : (
@@ -181,6 +223,14 @@ export default function Timer({ setShowTimer }) {
           </div>
           {timerFinished && <div className="timer-alert">⏰ Time's Up!</div>}
         </div>
+      )}
+
+      {alertMessage && (
+        <StylishAlert
+          message={alertMessage}
+          onClose={clearAlert}
+          duration={3000}
+        />
       )}
 
       <audio ref={audioRef} preload="auto">

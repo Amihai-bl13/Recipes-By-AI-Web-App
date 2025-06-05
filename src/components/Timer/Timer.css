@@ -89,7 +89,7 @@
   border: 2px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   text-align: center;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   background: var(--card-bg);
   color: var(--text-primary);
 }
@@ -119,6 +119,23 @@
 .timer-start-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+}
+
+.timer-reset-btn {
+  background: linear-gradient(135deg, #bdbdbd, #757575);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 7%;
+}
+
+.timer-reset-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(117, 117, 117, 0.3);
 }
 
 .timer-display {

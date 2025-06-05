@@ -1,7 +1,8 @@
 // Header.js
-import React from 'react';
+import {React, useState} from 'react';
 import { FaSun, FaMoon } from 'react-icons/fa';
 import './Header.css';
+import StylishConfirm from '../StylishConfirm/StylishConfirm';
 
 export default function Header({
   user,
@@ -10,6 +11,17 @@ export default function Header({
   handleLogout,
   setShowTimer
 }) {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [onConfirmAction, setOnConfirmAction] = useState(() => () => {});
+
+  const handleClearRequest = () => {
+      setOnConfirmAction(() => () => {
+          setShowConfirm(false);
+          window.dispatchEvent(new Event('clearHistory'));
+      });
+      setShowConfirm(true);
+  };
+
   return (
     <header className="header">
       <div className="header-controls">
@@ -24,18 +36,20 @@ export default function Header({
             </button>
             <button
               className="logout-btn"
-              onClick={() => {
-                if (window.confirm("Are you sure you want to clear your chat history? (This will delete all past messages except the initial system prompt.)")) {
-                  // Emitting a custom event (or call a passed callback if you prefer)
-                  const event = new Event('clearHistory');
-                  window.dispatchEvent(event);
-                }
-              }}
               style={{ marginLeft: '8px' }}
+              onClick={handleClearRequest}
             >
               🗑️ Clear History
             </button>
           </>
+        )}
+
+        {showConfirm && (
+            <StylishConfirm
+                message="Are you sure you want to clear your chat history?"
+                onConfirm={onConfirmAction}
+                onCancel={() => setShowConfirm(false)}
+            />
         )}
 
         {user && (

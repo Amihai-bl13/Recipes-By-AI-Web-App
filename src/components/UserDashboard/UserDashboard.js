@@ -1,12 +1,14 @@
 // UserDashboard.js
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 import './UserDashboard.css';
+import StylishConfirm from '../StylishConfirm/StylishConfirm';
 
 /* Import sub-components */
 import FavoritesSection from '../FavoritesSection/FavoritesSection';
 import RecipeResult from '../RecipeResult/RecipeResult';
+import StylishAlert from '../StylishAlert/StylishAlert';
 
 export default function UserDashboard({
   user,
@@ -30,12 +32,18 @@ export default function UserDashboard({
 }) {
   const API_URL = "http://localhost:5000";
 
+  const [alertMessage, setAlertMessage] = useState('');
+  const clearAlert = () => setAlertMessage('');
+
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [onConfirmAction, setOnConfirmAction] = useState(() => () => {});
+
   // --------------------
   //  HANDLE PROMPT SUBMIT
   // --------------------
   const handleSubmitPrompt = async () => {
     if (!prompt.trim()) {
-      alert('Please enter a prompt or ingredients to suggest a recipe.');
+      setAlertMessage('Please enter a prompt or ingredients to suggest a recipe.');
       return;
     }
     setLoading(true);
@@ -50,9 +58,9 @@ export default function UserDashboard({
       setPlaceholder("Would you like to make any adjustments to the recipe or try something else?");
     } catch (err) {
       if (err.response && err.response.data && err.response.data.is_cooking_error) {
-        alert(err.response.data.error);
+        setAlertMessage(err.response.data.error);
       } else {
-        alert('Failed to fetch recipe suggestion.');
+        setAlertMessage('Failed to fetch recipe suggestion.');
       }
     } finally {
       setLoading(false);
@@ -72,9 +80,12 @@ export default function UserDashboard({
   };
 
   const clearRecipe = () => {
-    if (!window.confirm("Are you sure you want to clear the current recipe?")) {
-      return;
-    }
+    setOnConfirmAction(() => () => {
+        setShowConfirm(false);
+        window.dispatchEvent(new Event('clearRecipe'));
+    });
+    setShowConfirm(true);
+
     setRecipe('');
     setPrompt('');
     setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
@@ -112,11 +123,11 @@ export default function UserDashboard({
         { recipe, title },
         { withCredentials: true }
       );
-      alert('Recipe starred successfully!');
+      setAlertMessage('Recipe starred successfully!');
       fetchFavorites();
     } catch (error) {
       const errMsg = error.response?.data?.error || 'Failed to star recipe';
-      alert(errMsg);
+      setAlertMessage(errMsg);
     }
   };
 
@@ -129,7 +140,7 @@ export default function UserDashboard({
       setSelectedRecipe(null);
       fetchFavorites();
     } catch (error) {
-      alert('Failed to remove recipe from favorites');
+      setAlertMessage('Failed to remove recipe from favorites');
     }
   };
 
@@ -155,13 +166,13 @@ export default function UserDashboard({
       }
       try {
         await axios.post(`${API_URL}/clear_history`, {}, { withCredentials: true });
-        alert("Conversation history cleared.");
+        setAlertMessage("Conversation history cleared.");
         setRecipe('');
         setPrompt('');
         setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
       } catch (error) {
         console.error("Error clearing history:", error);
-        alert("Failed to clear history.");
+        setAlertMessage("Failed to clear history.");
       }
     };
 
@@ -231,6 +242,23 @@ export default function UserDashboard({
           starRecipe={starRecipe}
         />
       )}
+
+      {alertMessage && (
+        <StylishAlert
+          message={alertMessage}
+          onClose={clearAlert}
+          duration={3000}
+        />
+      )}
+
+      {showConfirm && (
+        <StylishConfirm
+          message="Are you sure you want to clear the recipe?"
+          onConfirm={onConfirmAction}
+          onCancel={() => setShowConfirm(false)}
+        />
+      )}
+
     </div>
   );
 }
