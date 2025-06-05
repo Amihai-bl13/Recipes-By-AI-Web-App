@@ -4,8 +4,6 @@ import axios from 'axios';
 
 import './UserDashboard.css';
 import StylishConfirm from '../StylishConfirm/StylishConfirm';
-
-/* Import sub-components */
 import FavoritesSection from '../FavoritesSection/FavoritesSection';
 import RecipeResult from '../RecipeResult/RecipeResult';
 import StylishAlert from '../StylishAlert/StylishAlert';
@@ -33,16 +31,13 @@ export default function UserDashboard({
   const API_URL = "http://localhost:5000";
 
   const [alertMessage, setAlertMessage] = useState('');
+  const [showRecipeConfirm, setShowRecipeConfirm] = useState(false);
+  const [showHistoryConfirm, setShowHistoryConfirm] = useState(false);
+
   const clearAlert = () => setAlertMessage('');
 
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [onConfirmAction, setOnConfirmAction] = useState(() => () => {});
-
-  // --------------------
-  //  HANDLE PROMPT SUBMIT
-  // --------------------
   const handleSubmitPrompt = async () => {
-    if (!prompt.trim()) {
+    if (!prompt.trim() || prompt.trim == '') {
       setAlertMessage('Please enter a prompt or ingredients to suggest a recipe.');
       return;
     }
@@ -57,7 +52,7 @@ export default function UserDashboard({
       setPrompt('');
       setPlaceholder("Would you like to make any adjustments to the recipe or try something else?");
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.is_cooking_error) {
+      if (err.response?.data?.is_cooking_error) {
         setAlertMessage(err.response.data.error);
       } else {
         setAlertMessage('Failed to fetch recipe suggestion.');
@@ -67,9 +62,6 @@ export default function UserDashboard({
     }
   };
 
-  // --------------------
-  //  FETCH / STAR / REMOVE FAVORITES
-  // --------------------
   const fetchFavorites = async () => {
     try {
       const res = await axios.get(`${API_URL}/favorites`, { withCredentials: true });
@@ -79,22 +71,20 @@ export default function UserDashboard({
     }
   };
 
-  const clearRecipe = () => {
-    setOnConfirmAction(() => () => {
-        setShowConfirm(false);
-        window.dispatchEvent(new Event('clearRecipe'));
-    });
-    setShowConfirm(true);
-
+  const handleConfirmClearRecipe = () => {
     setRecipe('');
     setPrompt('');
     setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
+    setShowRecipeConfirm(false);
+  };
+
+  const clearRecipe = () => {
+    setShowRecipeConfirm(true);
   };
 
   const starRecipe = async () => {
     if (!recipe) return;
 
-    // Extract a reasonable title from the HTML string:
     let title = 'Untitled Recipe';
     const h3Match = recipe.match(/<h3[^>]*>(.*?)<\/h3>/i);
     if (h3Match) {
@@ -144,50 +134,47 @@ export default function UserDashboard({
     }
   };
 
-  // Sort favorites array into a new variable
-  const sortedFavorites = [...favorites].sort((a, b) => {
-    const dateA = new Date(a.date_added);
-    const dateB = new Date(b.date_added);
-    return sortOrder === 'latest' ? dateB - dateA : dateA - dateB;
-  });
+  const handleConfirmClearHistory = async () => {
+    try {
+      await axios.post(`${API_URL}/clear_history`, {}, { withCredentials: true });
+      setAlertMessage("Conversation history cleared.");
+      setRecipe('');
+      setPrompt('');
+      setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
+    } catch (error) {
+      console.error("Error clearing history:", error);
+      setAlertMessage("Failed to clear history.");
+    } finally {
+      setShowHistoryConfirm(false);
+    }
+  };
 
-  // Fetch favorites when component mounts (and whenever user changes)
   useEffect(() => {
     if (user) {
       fetchFavorites();
     }
   }, [user]);
 
-  // Listen for “clearHistory” event from Header (to invoke /clear_history)
   useEffect(() => {
-    const onClearHistory = async () => {
-      if (!window.confirm("Are you sure you want to clear your chat history? (This will delete all past messages except the initial system prompt.)")) {
-        return;
-      }
-      try {
-        await axios.post(`${API_URL}/clear_history`, {}, { withCredentials: true });
-        setAlertMessage("Conversation history cleared.");
-        setRecipe('');
-        setPrompt('');
-        setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
-      } catch (error) {
-        console.error("Error clearing history:", error);
-        setAlertMessage("Failed to clear history.");
-      }
+    const onClearHistory = () => {
+      setShowHistoryConfirm(true);
     };
 
     window.addEventListener('clearHistory', onClearHistory);
     return () => window.removeEventListener('clearHistory', onClearHistory);
   }, []);
 
-  // --------------------
-  //  HANDLERS FOR KEYBOARD SUBMIT
-  // --------------------
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && e.ctrlKey) {
       handleSubmitPrompt();
     }
   };
+
+  const sortedFavorites = [...favorites].sort((a, b) => {
+    const dateA = new Date(a.date_added);
+    const dateB = new Date(b.date_added);
+    return sortOrder === 'latest' ? dateB - dateA : dateA - dateB;
+  });
 
   return (
     <div className="card user-dashboard-card">
@@ -251,14 +238,21 @@ export default function UserDashboard({
         />
       )}
 
-      {showConfirm && (
+      {showRecipeConfirm && (
         <StylishConfirm
-          message="Are you sure you want to clear the recipe?"
-          onConfirm={onConfirmAction}
-          onCancel={() => setShowConfirm(false)}
+          message="Are you sure you want to clear the current recipe?"
+          onConfirm={handleConfirmClearRecipe}
+          onCancel={() => setShowRecipeConfirm(false)}
         />
       )}
 
+      {showHistoryConfirm && (
+        <StylishConfirm
+          message="Are you sure you want to clear your chat history? (This will delete all past messages except the initial system prompt.)"
+          onConfirm={handleConfirmClearHistory}
+          onCancel={() => setShowHistoryConfirm(false)}
+        />
+      )}
     </div>
   );
 }

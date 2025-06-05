@@ -1,6 +1,7 @@
 // FavoritesSection.js
-import React from 'react';
+import {React, useState} from 'react';
 import './FavoritesSection.css';
+import StylishConfirm from '../StylishConfirm/StylishConfirm';
 
 export default function FavoritesSection({
   favorites,
@@ -13,6 +14,15 @@ export default function FavoritesSection({
   setSelectedRecipe,
   removeFromFavorites
 }) {
+
+  const [showDeleteFromFavoritesConfirm, setShowDeleteFromFavoritesConfirm] = useState(false);
+  const [toDeleteFromFavorites, setToDeleteFromFavorites] = useState(null);
+
+  const confirmDeleteFromFavorites = async(recipeId) => {
+    setToDeleteFromFavorites(recipeId);
+    setShowDeleteFromFavoritesConfirm(true);
+  }
+
   return (
     <div className="favorites-section">
       <button
@@ -55,7 +65,7 @@ export default function FavoritesSection({
                   >
                     {selectedRecipe?.id === fav.id ? '❌ Hide' : '🔎 View'}
                   </button>
-                  <button onClick={() => removeFromFavorites(fav.id)}>🗑️ Delete</button>
+                  <button onClick={() => confirmDeleteFromFavorites(fav.id)}>🗑️ Delete</button>
                 </div>
               </div>
             ))}
@@ -76,6 +86,17 @@ export default function FavoritesSection({
             </div>
           )}
         </div>
+      )}
+
+      {showDeleteFromFavoritesConfirm && (
+        <StylishConfirm
+          message="Are you sure you want to remove this recipe from your favorites?"
+          onConfirm={() => {
+            removeFromFavorites(toDeleteFromFavorites);
+            setShowDeleteFromFavoritesConfirm(false);
+          }}
+          onCancel={() => setShowDeleteFromFavoritesConfirm(false)}
+        />
       )}
     </div>
   );

@@ -1,36 +1,205 @@
-/* src/components/StylishAlert/StylishAlert.css */
-
 .stylish-alert {
   position: fixed;
-  bottom: 20px;
+  top: 30px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--accent);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
-  box-shadow: var(--shadow);
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  padding: 16px 24px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-hover);
   display: flex;
   align-items: center;
   z-index: 2000;
-  animation: fadeIn 0.3s ease-out;
+  animation: slideInBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  min-width: 300px;
+  max-width: 500px;
+  transition: all 0.3s ease;
+}
+
+.stylish-alert:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.stylish-alert::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  border-radius: 16px;
+  pointer-events: none;
 }
 
 .stylish-alert-text {
   flex: 1;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+  color: var(--text-primary);
 }
 
 .stylish-alert-close {
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 1.2rem;
-  margin-left: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  margin-left: 16px;
   cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  position: relative;
+  z-index: 1;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, 20px); }
-  to   { opacity: 1; transform: translate(-50%, 0); }
+.stylish-alert-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: var(--border);
+  transform: scale(1.1) rotate(90deg);
+}
+
+.stylish-alert-close:active {
+  transform: scale(0.95) rotate(90deg);
+}
+
+/* Success variant */
+.stylish-alert.success {
+  background: linear-gradient(135deg, var(--success) 0%, #38ef7d 100%);
+  box-shadow: var(--shadow);
+}
+
+.stylish-alert.success:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+/* Error variant */
+.stylish-alert.error {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  box-shadow: var(--shadow);
+}
+
+.stylish-alert.error:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+/* Warning variant */
+.stylish-alert.warning {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: var(--shadow);
+}
+
+.stylish-alert.warning:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+/* Animations */
+@keyframes slideInBounce {
+  0% { 
+    opacity: 0; 
+    transform: translate(-50%, -100px) scale(0.8); 
+  }
+  60% { 
+    opacity: 1; 
+    transform: translate(-50%, 5px) scale(1.05); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translate(-50%, 0) scale(1); 
+  }
+}
+
+@keyframes slideOut {
+  0% { 
+    opacity: 1; 
+    transform: translate(-50%, 0) scale(1); 
+  }
+  100% { 
+    opacity: 0; 
+    transform: translate(-50%, -50px) scale(0.9); 
+  }
+}
+
+.stylish-alert.dismissing {
+  animation: slideOut 0.3s ease-in forwards;
+}
+
+/* Pulsing effect for urgent alerts */
+.stylish-alert.urgent {
+  animation: slideInBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+             pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    box-shadow: var(--shadow);
+  }
+  50% { 
+    box-shadow: var(--shadow-hover);
+  }
+}
+
+/* Dark mode support */
+:root[data-theme='dark'] .stylish-alert {
+  border-color: var(--border);
+}
+  
+:root[data-theme='dark'] .stylish-alert::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .stylish-alert {
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    transform: none;
+    max-width: none;
+    min-width: auto;
+  }
+  
+  .stylish-alert:hover {
+    transform: translateY(-2px);
+  }
+  
+  @keyframes slideInBounce {
+    0% { 
+      opacity: 0; 
+      transform: translateY(-100px) scale(0.8); 
+    }
+    60% { 
+      opacity: 1; 
+      transform: translateY(5px) scale(1.05); 
+    }
+    100% { 
+      opacity: 1; 
+      transform: translateY(0) scale(1); 
+    }
+  }
+  
+  @keyframes slideOut {
+    0% { 
+      opacity: 1; 
+      transform: translateY(0) scale(1); 
+    }
+    100% { 
+      opacity: 0; 
+      transform: translateY(-50px) scale(0.9); 
+    }
+  }
 }
