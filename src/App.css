@@ -12,7 +12,7 @@
 
 /* Light theme: default */
 :root {
-  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --bg-gradient: linear-gradient(135deg, #71c9f5 0%, #764ba2 100%);
   --card-bg: rgba(255, 255, 255, 0.95);
   --text-primary: #2d3748;
   --text-secondary: #718096;
@@ -53,6 +53,7 @@ body {
   justify-content: center;
   position: relative;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Grain overlay (static SVG as background) */

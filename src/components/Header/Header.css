@@ -17,17 +17,17 @@
   position: relative;
 }
 
-.logo::after {
+/* .logo::after {
   content: '';
   position: absolute;
   bottom: -10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
+  width: 45%;
   height: 3px;
   background: var(--accent);
   border-radius: 2px;
-}
+} */
 
 .tagline {
   color: rgba(255, 255, 255, 0.9);

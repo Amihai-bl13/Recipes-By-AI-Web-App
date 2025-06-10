@@ -1,6 +1,6 @@
-/* FloatingShapes.css */
+/* FloatingFoodShapes.css */
 
-.floating-shapes {
+.floating-food {
   position: fixed;
   top: 0;
   left: 0;
@@ -8,47 +8,77 @@
   height: 100%;
   pointer-events: none;
   z-index: 1;
+  overflow: hidden;
 }
 
-.shape {
+.food-item {
   position: absolute;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
   animation: float 20s infinite ease-in-out;
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.1));
+  user-select: none;
 }
 
-.shape-1 {
-  width: 80px;
-  height: 80px;
-  top: 20%;
-  left: 10%;
-  animation-delay: 0s;
+/* Left side items */
+.food-1 {
+  font-size: 80px;
+  top: 15%;
+  left: 2%;
 }
 
-.shape-2 {
-  width: 120px;
-  height: 120px;
-  top: 60%;
-  right: 15%;
-  animation-delay: -5s;
+.food-2 {
+  font-size: 70px;
+  top: 45%;
+  left: 5%;
 }
 
-.shape-3 {
-  width: 60px;
-  height: 60px;
+.food-3 {
+  font-size: 85px;
+  top: 75%;
+  left: 3%;
+}
+
+.food-4 {
+  font-size: 75px;
+  top: 30%;
+  left: 1%;
+}
+
+/* Right side items */
+.food-5 {
+  font-size: 120px;
+  top: 25%;
+  right: 2%;
+}
+
+.food-6 {
+  font-size: 100px;
+  top: 55%;
+  right: 4%;
+}
+
+.food-7 {
+  font-size: 95px;
+  top: 10%;
+  right: 1%;
+}
+
+.food-8 {
+  font-size: 90px;
   top: 80%;
-  left: 20%;
-  animation-delay: -10s;
+  right: 3%;
 }
 
 @keyframes float {
   0%, 100% {
     transform: translateY(0px) rotate(0deg);
+    opacity: 0.5;
   }
   33% {
-    transform: translateY(-30px) rotate(120deg);
+    transform: translateY(-30px) rotate(5deg);
+    opacity: 0.8;
   }
   66% {
-    transform: translateY(20px) rotate(240deg);
+    transform: translateY(20px) rotate(-5deg);
+    opacity: 0.6;
   }
 }

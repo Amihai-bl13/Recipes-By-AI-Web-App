@@ -3,6 +3,8 @@ import {React, useState} from 'react';
 import { FaSun, FaMoon } from 'react-icons/fa';
 import './Header.css';
 import StylishConfirm from '../StylishConfirm/StylishConfirm';
+import AiRecipeChef from '../../assets/AiRecipeChef.png';
+import Logo from '../../assets/Logo.jsx';
 
 export default function Header({
   user,
@@ -62,8 +64,11 @@ export default function Header({
         )}
       </div>
 
-      <h1 className="logo">🍳 AI Recipe Chef</h1>
-      <p className="tagline">Culinary magic at your fingertips</p>
+      <h1 className="logo">
+        {/* <img src={AiRecipeChef} alt="AI Recipe Chef Logo" style={{ width: '150px', height: '150px' }} /> */}
+        <Logo />
+      </h1>
+      {/* <p className="tagline">Culinary magic at your fingertips</p> */}
     </header>
   );
 }
