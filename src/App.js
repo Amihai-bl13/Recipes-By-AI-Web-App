@@ -20,7 +20,7 @@ const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 //const API_URL = "http://localhost:5000";
 
 //For production, use the deployed backend URL
-const API_URL = "https://recipes-by-ai-web-app-front.onrender.com/";
+const API_URL = "https://recipes-by-ai-web-app.onrender.com/";
 
 function App() {
   const [user, setUser] = useState(null);
