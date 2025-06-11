@@ -28,7 +28,11 @@ export default function UserDashboard({
   setSortOrder,
   handleLogout
 }) {
-  const API_URL = "http://localhost:5000";
+  //For local development, change this to your backend URL
+  //const API_URL = "http://localhost:5000";
+
+  //For production, use the deployed backend URL
+  const API_URL = "https://recipes-by-ai-web-app-front.onrender.com/";
 
   const [alertMessage, setAlertMessage] = useState('');
   const [showRecipeConfirm, setShowRecipeConfirm] = useState(false);

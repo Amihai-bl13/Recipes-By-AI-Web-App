@@ -15,7 +15,12 @@ import LoadingOverlay from './components/LoadingOverlay/LoadingOverlay';
 import TermsAndConditions from './components/TermsAndConditions/TermsAndConditions'; // NEW IMPORT
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-const API_URL = "http://localhost:5000";
+
+//For local development, change this to your backend URL
+//const API_URL = "http://localhost:5000";
+
+//For production, use the deployed backend URL
+const API_URL = "https://recipes-by-ai-web-app-front.onrender.com/";
 
 function App() {
   const [user, setUser] = useState(null);

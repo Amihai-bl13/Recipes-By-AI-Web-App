@@ -16,7 +16,12 @@ from database.models import DatabaseManager
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Used for session encryption
-CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+
+# Run Locally:
+#CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+
+#Run on Render:
+CORS(app, origins=["https://recipes-by-ai-web-app.onrender.com/"], supports_credentials=True)
 
 load_dotenv()
 
