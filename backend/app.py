@@ -20,6 +20,12 @@ app.secret_key = os.urandom(24)  # Used for session encryption
 # Run Locally:
 #CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
+
+# allow the session cookie to be sent in cross-site requests
+app.config.update({
+    "SESSION_COOKIE_SAMESITE": "None",
+    "SESSION_COOKIE_SECURE": True,
+})
 #Run on Render:
 CORS(app, origins=["https://recipes-by-ai-web-app-front.onrender.com"], supports_credentials=True)
 
