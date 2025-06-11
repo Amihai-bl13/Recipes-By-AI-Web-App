@@ -51,13 +51,17 @@ def login_with_google():
         session["user_id"] = user["id"]
         session["google_id"] = google_id
 
+        # Check if user needs to accept terms (new user OR existing user who hasn't accepted)
+        needs_terms = user.get("is_new_user", False) or not user.get("terms_accepted", False)
+
         return jsonify({
             "message": "Login successful", 
             "user": {
                 "email": user["email"],
                 "name": user["name"],
                 "picture": user["picture"]
-            }
+            },
+            "isNewUser": needs_terms  # This will be true for new users OR users who haven't accepted terms
         })
     except Exception as e:
         print("Google login error:")
@@ -81,12 +85,33 @@ def me():
     user = db.get_user_by_google_id(google_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
+
+    # Check if user has accepted terms
+    if not user.get("terms_accepted", False):
+        return jsonify({"error": "Terms not accepted"}), 403
     
     return jsonify({
         "email": user["email"],
         "name": user["name"],
         "picture": user["picture"]
     })
+
+@app.route("/accept-terms", methods=["POST"])
+def accept_terms():
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Not logged in"}), 401
+    
+    try:
+        success = db.accept_terms(user_id)
+        if success:
+            return jsonify({"message": "Terms accepted successfully"})
+        else:
+            return jsonify({"error": "Failed to accept terms"}), 500
+    except Exception as e:
+        print("Terms acceptance error:")
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/suggest_recipe", methods=["POST", "OPTIONS"])
 def suggest_recipe():

@@ -41,6 +41,8 @@ class DatabaseManager:
                     name TEXT,
                     picture TEXT,
                     password_hash TEXT NOT NULL,
+                    terms_accepted BOOLEAN DEFAULT FALSE,
+                    terms_accepted_at TIMESTAMP NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
@@ -107,6 +109,8 @@ class DatabaseManager:
                 "SELECT * FROM users WHERE google_id = ?", (google_id,)
             ).fetchone()
             
+            is_new_user = existing_user is None
+            
             if existing_user:
                 # Update existing user
                 conn.execute("""
@@ -122,31 +126,33 @@ class DatabaseManager:
                 password_hash = self.hash_password(password)
                 
                 cursor = conn.execute("""
-                    INSERT INTO users (google_id, email, name, picture, password_hash)
-                    VALUES (?, ?, ?, ?, ?)
-                """, (google_id, email, name, picture, password_hash))
+                    INSERT INTO users (google_id, email, name, picture, password_hash, terms_accepted)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (google_id, email, name, picture, password_hash, False))
                 
                 user_id = cursor.lastrowid
             
             conn.commit()
             
-            # Return user data
+            # Return user data with is_new_user flag
             user_data = conn.execute(
-                "SELECT id, google_id, email, name, picture FROM users WHERE id = ?", 
+                "SELECT id, google_id, email, name, picture, terms_accepted FROM users WHERE id = ?", 
                 (user_id,)
             ).fetchone()
             
             result = dict(user_data)
+            result['is_new_user'] = is_new_user  # Add this flag
+            result['terms_accepted'] = bool(result.get('terms_accepted', False))
             
             # Cache the user data
             self._cache_user(google_id, result)
             
             # Initialize system message for new user (only if it's a new user)
-            if not existing_user:
+            if is_new_user:
                 self._add_system_message(user_id)
             
             return result
-            
+        
         finally:
             conn.close()
     
@@ -209,12 +215,13 @@ class DatabaseManager:
         conn = self.get_connection()
         try:
             user = conn.execute(
-                "SELECT id, google_id, email, name, picture FROM users WHERE google_id = ?", 
+                "SELECT id, google_id, email, name, picture, terms_accepted FROM users WHERE google_id = ?", 
                 (google_id,)
             ).fetchone()
-            
+                
             if user:
                 user_data = dict(user)
+                user_data['terms_accepted'] = bool(user_data.get('terms_accepted', False))
                 self._cache_user(google_id, user_data)
                 return user_data
             return None
@@ -336,5 +343,19 @@ class DatabaseManager:
                 (user_id,)
             )
             conn.commit()
+        finally:
+            conn.close()
+
+    def accept_terms(self, user_id: int) -> bool:
+        """Mark user as having accepted terms"""
+        conn = self.get_connection()
+        try:
+            cursor = conn.execute("""
+                UPDATE users 
+                SET terms_accepted = TRUE, terms_accepted_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            """, (user_id,))
+            conn.commit()
+            return cursor.rowcount > 0
         finally:
             conn.close()

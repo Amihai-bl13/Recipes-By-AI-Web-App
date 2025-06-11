@@ -1,4 +1,3 @@
-// App.js
 import React, { useState, useEffect } from 'react';
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
@@ -13,6 +12,7 @@ import LoginArea from './components/LoginArea/LoginArea';
 import UserDashboard from './components/UserDashboard/UserDashboard';
 import Timer from './components/Timer/Timer';
 import LoadingOverlay from './components/LoadingOverlay/LoadingOverlay';
+import TermsAndConditions from './components/TermsAndConditions/TermsAndConditions'; // NEW IMPORT
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const API_URL = "http://localhost:5000";
@@ -23,6 +23,10 @@ function App() {
 
   // Shared states for child components:
   const [loading, setLoading] = useState(false);
+
+  // NEW: Terms & Conditions states
+  const [showTerms, setShowTerms] = useState(false);
+  const [pendingUser, setPendingUser] = useState(null); // Store user data until terms accepted
 
   // For passing into UserDashboard:
   const [recipe, setRecipe] = useState('');
@@ -57,10 +61,50 @@ function App() {
         { token },
         { withCredentials: true }
       );
-      setUser(res.data.user);
-      setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
+      
+      const userData = res.data.user;
+      const needsTerms = res.data.isNewUser; // This now covers both new users and users who haven't accepted terms
+      
+      if (needsTerms) {
+        // Show terms for users who need to accept them
+        setPendingUser(userData);
+        setShowTerms(true);
+      } else {
+        // User has already accepted terms - proceed normally
+        setUser(userData);
+        setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
+      }
     } catch (error) {
       console.error('Login error:', error);
+    }
+  };
+
+  const handleTermsAccept = async () => {
+    try {
+      // Mark terms as accepted in backend
+      await axios.post(`${API_URL}/accept-terms`, {}, { withCredentials: true });
+      
+      // Set the user and hide terms
+      setUser(pendingUser);
+      setPendingUser(null);
+      setShowTerms(false);
+      setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
+    } catch (error) {
+      console.error('Error accepting terms:', error);
+    }
+  };
+
+  const handleTermsDecline = async () => {
+    try {
+      // Log out the user since they declined terms
+      await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
+      
+      // Reset states
+      setPendingUser(null);
+      setShowTerms(false);
+      setUser(null);
+    } catch (error) {
+      console.error('Error declining terms:', error);
     }
   };
 
@@ -108,6 +152,14 @@ function App() {
         {showTimer && (
           <Timer
             setShowTimer={setShowTimer}
+          />
+        )}
+
+        {/* Show Terms & Conditions modal for new users */}
+        {showTerms && (
+          <TermsAndConditions
+            onAccept={handleTermsAccept}
+            onDecline={handleTermsDecline}
           />
         )}
 
