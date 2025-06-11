@@ -32,7 +32,7 @@ export default function UserDashboard({
   //const API_URL = "http://localhost:5000";
 
   //For production, use the deployed backend URL
-  const API_URL = "https://recipes-by-ai-web-app.onrender.com/";
+  const API_URL = "https://recipes-by-ai-web-app.onrender.com";
 
   const [alertMessage, setAlertMessage] = useState('');
   const [showRecipeConfirm, setShowRecipeConfirm] = useState(false);

@@ -21,7 +21,7 @@ app.secret_key = os.urandom(24)  # Used for session encryption
 #CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 #Run on Render:
-CORS(app, origins=["https://recipes-by-ai-web-app-front.onrender.com/"], supports_credentials=True)
+CORS(app, origins=["https://recipes-by-ai-web-app-front.onrender.com"], supports_credentials=True)
 
 load_dotenv()
 
