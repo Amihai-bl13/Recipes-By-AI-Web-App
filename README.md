@@ -1,70 +1,150 @@
-# Getting Started with Create React App
+# 🍳 Recipes by AI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An AI-powered web app that helps you cook with whatever you have in your kitchen! Just log in with Google, describe your ingredients or cravings, and get delicious recipes generated instantly by a smart AI model.
+Accessible here: https://recipes-by-ai-web-app-front.onrender.com/
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 📸 Demo
 
-### `npm start`
+![image](https://github.com/user-attachments/assets/3e8b6801-7ade-4f20-b71b-9fbb2609ffaf)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 📋 Features
 
-### `npm test`
+- **Google OAuth Login**: Sign in quickly and securely.
+- **Terms Acceptance**: First-time users accept terms & conditions.
+- **AI‑Powered Recipe Generation**: Describe your ingredients or cravings, and our Mistral‑7B‑Instruct model does the rest.
+- **Favorites**: Star, view, and delete your favorite recipes.
+- **Conversation Memory**: Keeps context to chat naturally with the assistant.
+- **Dark/Light Themes**: Toggle for comfort anytime.
+- **Timer**: Built-in kitchen timer for perfect cooking rhythm.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🛠 Tech Stack
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+**Frontend**:
+- React
+- JavaScript
+- HTML/CSS
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+**Backend**:
+- Python (Flask)
+- Flask-Login
+- OpenRouter API (for Mistral-7B-Instruct model)
+- Google OAuth
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+**Database**:
+- SQLite (via SQLAlchemy)
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🚀 Getting Started - Run Locally
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 1. Clone the Repository
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+git clone https://github.com/Amihai-bl13/Recipes-By-AI-Web-App.git
+cd Recipes-By-AI-Web-App
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 2. Set Up the Backend
 
-## Learn More
+Create and activate a Python virtual environment:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Install requirements:
 
-### Code Splitting
+```bash
+pip install -r requirements.txt
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Create a `.env` file in the backend directory with your credentials:
 
-### Analyzing the Bundle Size
+```env
+GOOGLE_CLIENT_ID=your_google_client_id
+OPENROUTER_API_KEY=your_openrouter_key
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Update the App.py (backend folder), App.js (root folder) and UserDashboard.js (components folder) to include the commented: API_URL (for the js files) and the commented "CORS(...)" in the py file. Comment the currently used API_URL and "CORS(...)" lines, as they serve for the deployed website.
 
-### Making a Progressive Web App
+Run the Flask server:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```bash
+cd recipe-app\backend
+python app.py
+```
 
-### Advanced Configuration
+### 3. Set Up the Frontend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Go to the frontend folder and install dependencies:
 
-### Deployment
+```bash
+cd recipe-app
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Start the development server:
 
-### `npm run build` fails to minify
+```bash
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Make sure the frontend connects to your Flask server (usually at `http://localhost:5000`).
+
+---
+
+## 📁 Project Structure
+
+```
+Recipes-By-AI-Web-App/
+├── backend/
+│   ├── app.py
+│   ├── auth.py
+│   ├── models.py
+│   └── templates/
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   └── package.json
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## ⚠️ Limitations
+
+- Currently **not optimized for mobile screens**.
+- Basic error handling (may be improved).
+- Only supports Google login (no email/password option).
+
+---
+
+## 📌 Future Improvements
+
+- Bugs fixing.
+- Responsive design for mobile and tablets.
+- Multiple AI model options.
+
+---
+
+## 🙌 Credits
+
+Built by [Amihai](https://github.com/Amihai-bl13) using:
+- [OpenRouter](https://openrouter.ai/)
+- [React](https://react.dev/)
+- [Flask](https://flask.palletsprojects.com/)
+- [Google OAuth](https://developers.google.com/identity)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
