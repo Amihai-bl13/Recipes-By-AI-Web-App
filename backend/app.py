@@ -30,7 +30,10 @@ GOOGLE_CLIENT_ID    = os.getenv("GOOGLE_CLIENT_ID")
 OPENROUTER_API_KEY  = os.getenv("OPENROUTER_API_KEY")  # get yours at https://openrouter.ai
 
 # Initialize database with new path (recipe-app/database instead of recipe-app/backend/database)
-db = DatabaseManager("../database/recipe_app.db")
+# For local development:
+# db = DatabaseManager("../database/recipe_app.db")
+# for production:
+db = DatabaseManager("/tmp/recipe_app.db")
 
 @app.route("/login/google", methods=["POST"])
 def login_with_google():
