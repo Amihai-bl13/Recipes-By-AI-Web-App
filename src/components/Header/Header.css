@@ -3,7 +3,7 @@
 .header {
   text-align: center;
   position: relative;
-  min-height: 120px;
+  min-height: 200px;
 }
 
 .logo {
@@ -11,7 +11,6 @@
   font-size: 2.5rem;
   font-weight: 700;
   color: white;
-  margin-bottom: 8px;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   position: relative;
 }
@@ -40,9 +39,9 @@
   display: flex;
   align-items: center;
   justify-content: right;
-  gap: 15px;
-  margin-top: 5px;
+  gap: 10px;
   z-index: 5;
+  margin-bottom: -2%;
 }
 
 .theme-btn {

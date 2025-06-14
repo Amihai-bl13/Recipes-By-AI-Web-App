@@ -11,6 +11,7 @@
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
   transition: all 0.3s ease;
+  margin-top: -5%;
 }
 
 .user-dashboard-card:hover {
