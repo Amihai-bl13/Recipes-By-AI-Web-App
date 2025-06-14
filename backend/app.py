@@ -18,7 +18,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Used for session encryption
 
 # Run Locally:
-#CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 
 # allow the session cookie to be sent in cross-site requests
@@ -27,7 +27,7 @@ app.config.update({
     "SESSION_COOKIE_SECURE": True,
 })
 #Run on Render:
-CORS(app, origins=["https://recipes-by-ai-web-app-front.onrender.com"], supports_credentials=True)
+# CORS(app, origins=["https://recipes-by-ai-web-app-front.onrender.com"], supports_credentials=True)
 
 load_dotenv()
 
@@ -37,9 +37,9 @@ OPENROUTER_API_KEY  = os.getenv("OPENROUTER_API_KEY")  # get yours at https://op
 
 # Initialize database with new path (recipe-app/database instead of recipe-app/backend/database)
 # For local development:
-# db = DatabaseManager("../database/recipe_app.db")
+db = DatabaseManager("../database/recipe_app.db")
 # for production:
-db = DatabaseManager("/tmp/recipe_app.db")
+# db = DatabaseManager("/tmp/recipe_app.db")
 
 @app.route("/login/google", methods=["POST"])
 def login_with_google():
