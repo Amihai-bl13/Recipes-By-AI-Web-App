@@ -90,7 +90,7 @@ export default function FavoritesSection({
 
       {showDeleteFromFavoritesConfirm && (
         <StylishConfirm
-          message="Are you sure you want to clear your chat history? This will delete all past messages."
+          message="Are you sure you want to remove this recipe from your favorites?"
           onConfirm={() => {
             removeFromFavorites(toDeleteFromFavorites);
             setShowDeleteFromFavoritesConfirm(false);
