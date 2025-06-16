@@ -25,6 +25,9 @@ app.secret_key = os.urandom(24)  # Used for session encryption
 app.config.update({
     "SESSION_COOKIE_SAMESITE": "None",
     "SESSION_COOKIE_SECURE": True,
+    "SESSION_COOKIE_HTTPONLY": False,  # Allow JavaScript access if needed
+    "SESSION_COOKIE_DOMAIN": None,     # Let browser handle domain
+    "PERMANENT_SESSION_LIFETIME": 86400  # 24 hours
 })
 #Run on Render:
 CORS(app, origins=["https://recipes-by-ai-web-app-front.onrender.com"], supports_credentials=True)
@@ -40,6 +43,17 @@ OPENROUTER_API_KEY  = os.getenv("OPENROUTER_API_KEY")  # get yours at https://op
 # db = DatabaseManager("../database/recipe_app.db")
 # for production:
 db = DatabaseManager("/tmp/recipe_app.db")
+
+@app.after_request
+def after_request(response):
+    # More permissive CORS for mobile browsers
+    origin = request.headers.get('Origin')
+    if origin == 'https://recipes-by-ai-web-app-front.onrender.com':
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
+    return response
 
 @app.route("/login/google", methods=["POST"])
 def login_with_google():
