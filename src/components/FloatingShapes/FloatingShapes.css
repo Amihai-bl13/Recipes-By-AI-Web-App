@@ -82,3 +82,85 @@
     opacity: 0.6;
   }
 }
+
+@media (max-width: 768px) {
+  .food-item {
+    animation: floatMobile 15s infinite ease-in-out;
+  }
+  
+  .food-1, .food-4 {
+    font-size: 60px;
+    left: 1%;
+  }
+  
+  .food-2 {
+    font-size: 55px;
+    left: 2%;
+  }
+  
+  .food-3 {
+    font-size: 65px;
+    left: 1%;
+  }
+  
+  .food-5 {
+    font-size: 80px;
+    right: 1%;
+  }
+  
+  .food-6 {
+    font-size: 70px;
+    right: 2%;
+  }
+  
+  .food-7 {
+    font-size: 75px;
+    right: 1%;
+  }
+  
+  .food-8 {
+    font-size: 70px;
+    right: 1%;
+  }
+}
+
+@media (max-width: 480px) {
+  .food-1, .food-4 {
+    font-size: 45px;
+  }
+  
+  .food-2 {
+    font-size: 40px;
+  }
+  
+  .food-3 {
+    font-size: 50px;
+  }
+  
+  .food-5 {
+    font-size: 60px;
+  }
+  
+  .food-6 {
+    font-size: 55px;
+  }
+  
+  .food-7 {
+    font-size: 60px;
+  }
+  
+  .food-8 {
+    font-size: 55px;
+  }
+}
+
+@keyframes floatMobile {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-20px) rotate(3deg);
+    opacity: 0.6;
+  }
+}

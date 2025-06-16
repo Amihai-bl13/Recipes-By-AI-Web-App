@@ -125,3 +125,79 @@
   cursor: not-allowed;
   transform: none;
 }
+
+@media (max-width: 768px) {
+  .user-dashboard-card {
+    padding: 25px 20px;
+    margin-top: 0;
+    border-radius: 16px;
+  }
+  
+  .user-info {
+    flex-direction: column;
+    text-align: center;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .avatar {
+    width: 50px;
+    height: 50px;
+    margin-right: 0;
+    margin-bottom: 12px;
+  }
+  
+  .welcome {
+    font-size: 1.2rem;
+    margin-bottom: 6px;
+  }
+  
+  .subtext {
+    font-size: 0.9rem;
+  }
+  
+  .prompt-input {
+    padding: 15px 16px;
+    font-size: 0.95rem;
+    min-height: 100px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+  }
+  
+  .suggest-btn {
+    padding: 15px;
+    font-size: 1rem;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-dashboard-card {
+    padding: 20px 15px;
+    border-radius: 12px;
+  }
+  
+  .user-info {
+    padding: 12px;
+  }
+  
+  .avatar {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .welcome {
+    font-size: 1.1rem;
+  }
+  
+  .prompt-input {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    min-height: 90px;
+  }
+  
+  .suggest-btn {
+    padding: 14px;
+    font-size: 0.95rem;
+  }
+}

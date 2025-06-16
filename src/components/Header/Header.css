@@ -1,5 +1,3 @@
-/* Header.css */
-
 .header {
   text-align: center;
   position: relative;
@@ -95,4 +93,70 @@
 .timer-toggle-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: scale(1.1);
+}
+
+
+@media (max-width: 768px) {
+  .header {
+    min-height: 140px;
+    padding: 20px 0;
+  }
+  
+  .logo {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+  
+  .tagline {
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }
+  
+  .header-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+  }
+  
+  .theme-btn,
+  .timer-toggle-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+  
+  .logout-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    min-height: 120px;
+  }
+  
+  .logo {
+    font-size: 1.8rem;
+  }
+  
+  .tagline {
+    font-size: 0.8rem;
+  }
+  
+  .header-controls {
+    gap: 6px;
+  }
+  
+  .theme-btn,
+  .timer-toggle-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .logout-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
 }

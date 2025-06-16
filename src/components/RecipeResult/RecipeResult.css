@@ -135,10 +135,85 @@
   margin-bottom: 5px;
 }
 
-/* Responsive tweaks */
-@media (max-width: 600px) {
-  .result-title::after {
-    width: 80%;
-    margin-left: 10%;
+@media (max-width: 768px) {
+  .recipe-result {
+    padding: 20px 15px;
+    margin-top: 20px;
+    border-radius: 16px;
+  }
+  
+  .recipe-header {
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .recipe-header .star-btn,
+  .recipe-header .clear-btn {
+    position: static;
+    order: 2;
+  }
+  
+  .result-title {
+    font-size: 1.5rem;
+    order: 1;
+  }
+  
+  .clear-btn,
+  .star-btn {
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    width: auto;
+    min-width: 120px;
+  }
+  
+  .recipe-text {
+    max-width: 100%;
+  }
+  
+  .recipe-text h3 {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+  }
+  
+  .recipe-text h4 {
+    font-size: 1.2rem;
+  }
+  
+  .recipe-text ul,
+  .recipe-text ol {
+    padding-left: 1rem;
+    margin: 0.2rem 0;
   }
 }
+
+@media (max-width: 480px) {
+  .recipe-result {
+    padding: 15px 12px;
+    border-radius: 12px;
+  }
+  
+  .result-title {
+    font-size: 1.3rem;
+  }
+  
+  .clear-btn,
+  .star-btn {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    min-width: 100px;
+  }
+  
+  .recipe-text h3 {
+    font-size: 1.2rem;
+  }
+  
+  .recipe-text h4 {
+    font-size: 1.1rem;
+  }
+  
+  .recipe-text h4::after {
+    width: 80px;
+  }
+}
+
