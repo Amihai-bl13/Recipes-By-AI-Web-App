@@ -274,3 +274,17 @@
     font-size: 0.85rem;
   }
 }
+
+@media (max-width: 768px) {
+  .floating-timer {
+    bottom: 20px;
+    right: 20px;
+    left: 20px;
+    min-width: 0;            /* allow it to shrink */
+    width: auto;             /* let content dictate width */
+    max-height: 60vh;        /* cap its height */
+    overflow-y: auto;        /* scroll if too tall */
+    padding: 12px;           /* trim padding */
+    border-radius: 12px;
+  }
+}

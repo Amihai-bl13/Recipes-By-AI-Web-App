@@ -22,6 +22,7 @@
   --border: rgba(255, 255, 255, 0.2);
   --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   --shadow-hover: 0 35px 60px -12px rgba(0, 0, 0, 0.3);
+  --border-color: rgba(255,255,255,0.2);
 }
 
 /* Dark theme override */
@@ -32,6 +33,7 @@
   --text-secondary: #e2e2e2;
   /* accent, accent-hover, success stay the same */
   --border: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* --------------------------

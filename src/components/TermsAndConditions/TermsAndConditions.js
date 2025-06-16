@@ -1,8 +1,9 @@
 import React from 'react';
 import './TermsAndConditions.css';
+import { createPortal } from 'react-dom';
 
 export default function TermsAndConditions({ onAccept, onDecline }) {
-  return (
+    return createPortal(
     <div className="terms-overlay">
       <div className="terms-modal">
         <div className="terms-header">
@@ -88,6 +89,7 @@ export default function TermsAndConditions({ onAccept, onDecline }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
