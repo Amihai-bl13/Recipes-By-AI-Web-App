@@ -56,6 +56,7 @@ body {
   position: relative;
   overflow-x: hidden;
   overflow-y: auto;
+  color-scheme: light;
 }
 
 /* Grain overlay (static SVG as background) */
@@ -78,6 +79,12 @@ body::before {
   width: 1030px;
   padding: 20px;
   max-width: 95%;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light;
+  }
 }
 
 @media (max-width: 768px) {
