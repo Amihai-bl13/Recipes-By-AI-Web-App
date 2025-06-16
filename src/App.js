@@ -45,6 +45,8 @@ function App() {
   // Timer states (to pass into <Timer />)
   const [showTimer, setShowTimer] = useState(false);
 
+  const [loginMessage, setLoginMessage] = useState(null);
+
   // --------------------
   //  AUTH / USER FETCH
   // --------------------
@@ -80,22 +82,37 @@ function App() {
     return localStorage.getItem('authToken');
   };
 
+  const pingBackend = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/ping`, { timeout: 1500 }); // short timeout
+      return res.status === 200;
+    } catch {
+      return false;
+    }
+  };
+
   const handleLoginSuccess = async (credentialResponse) => {
     const token = credentialResponse.credential;
+
+    const backendReady = await pingBackend();
+
+    if (!backendReady) {
+      setLoginMessage("Please stand by... the website is restarting itself and will be available shortly.");
+    } else {
+      setLoginMessage("Logging you in...");
+    }
+
+    setLoading(true);
+
     try {
-      const res = await axios.post(
-        `${API_URL}/login/google`,
-        { token }
-        // Remove withCredentials since we're not using cookies anymore
-      );
-      
+      const res = await axios.post(`${API_URL}/login/google`, { token });
+
       const userData = res.data.user;
-      const jwtToken = res.data.token;  // Get JWT token from response
+      const jwtToken = res.data.token;
       const needsTerms = res.data.isNewUser;
-      
-      // Store JWT token
+
       setAuthToken(jwtToken);
-      
+
       if (needsTerms) {
         setPendingUser(userData);
         setShowTerms(true);
@@ -103,8 +120,13 @@ function App() {
         setUser(userData);
         setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
       }
+
     } catch (error) {
       console.error('Login error:', error);
+      alert("Login failed. Please try again in a moment.");
+    } finally {
+      setLoading(false);
+      setLoginMessage(null);
     }
   };
 
@@ -234,7 +256,12 @@ function App() {
         )}
       </div>
 
-      {loading && <LoadingOverlay />}
+      {loading && (
+        <LoadingOverlay
+          text={loginMessage || "Crafting your perfect recipe..."}
+          subtext={loginMessage ? "This may take up to 30 seconds." : "This may take a moment"}
+        />
+      )}
     </GoogleOAuthProvider>
   );
 }

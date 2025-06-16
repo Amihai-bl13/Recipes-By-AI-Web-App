@@ -52,6 +52,7 @@ if not JWT_SECRET_KEY:
 #Run on Render:
 db = DatabaseManager("/tmp/recipe_app.db")
 
+
 def generate_token(user_data):
     payload = {
         "user_id": user_data["id"],
@@ -114,6 +115,10 @@ def after_request(response):
     # Remove problematic COOP
     response.headers.pop("Cross-Origin-Opener-Policy", None)
     return response
+
+@app.route('/ping')
+def ping():
+    return "pong", 200
 
 @app.route("/login/google", methods=["POST"])
 def login_with_google():
