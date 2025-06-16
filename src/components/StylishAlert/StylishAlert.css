@@ -3,7 +3,7 @@
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, rgba(80, 80, 200, 0.75) 0%, rgba(63, 172, 245, 0.7) 100%);
+  background: linear-gradient(135deg, rgba(200, 164, 80, 0.75) 0%, rgba(245, 175, 63, 0.7) 100%);
   color: var(--text-primary);
   padding: 16px 24px;
   border-radius: 16px;
@@ -17,6 +17,7 @@
   min-width: 300px;
   max-width: 500px;
   transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 .stylish-alert:hover {
