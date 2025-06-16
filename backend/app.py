@@ -20,6 +20,9 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Used for session encryption
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
+if not JWT_SECRET_KEY:
+    raise ValueError("JWT_SECRET_KEY is not set in environment variables")
+
 # Run Locally:
 # CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
@@ -95,6 +98,8 @@ def after_request(response):
         response.headers['Access-Control-Allow-Credentials'] = 'true'
         response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
+    # Remove problematic COOP
+    response.headers.pop("Cross-Origin-Opener-Policy", None)
     return response
 
 @app.route("/login/google", methods=["POST"])

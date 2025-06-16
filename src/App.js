@@ -117,7 +117,11 @@ function App() {
       setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
 
       // Mark terms as accepted in backend
-      await axios.post(`${API_URL}/accept-terms`, {}, { withCredentials: true });
+      await axios.post(
+        `${API_URL}/accept-terms`, 
+        {}
+        // ,{ withCredentials: true }
+      );
     } catch (error) {
       console.error('Error accepting terms:', error);
     }
@@ -126,7 +130,9 @@ function App() {
   const handleTermsDecline = async () => {
     try {
       // Log out the user since they declined terms
-      await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
+      await axios.post(`${API_URL}/logout`, {}
+        // { ,withCredentials: true }
+      );
       
       // Reset states
       setPendingUser(null);
