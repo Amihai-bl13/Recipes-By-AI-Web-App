@@ -21,7 +21,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Used for session encryption
 
 # Run Locally:
-# CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 
 # allow the session cookie to be sent in cross-site requests
@@ -33,7 +33,7 @@ app.config.update({
     "PERMANENT_SESSION_LIFETIME": 86400  # 24 hours
 })
 #Run on Render:
-CORS(app, origins=["https://recipes-by-ai-web-app-front.onrender.com"], supports_credentials=True)
+# CORS(app, origins=["https://recipes-by-ai-web-app-front.onrender.com"], supports_credentials=True)
 
 load_dotenv()
 
@@ -47,9 +47,9 @@ if not JWT_SECRET_KEY:
 
 # Initialize database with new path (recipe-app/database instead of recipe-app/backend/database)
 # For local development:
-# db = DatabaseManager("../database/recipe_app.db")
+db = DatabaseManager("../database/recipe_app.db")
 # for production:
-db = DatabaseManager("/tmp/recipe_app.db")
+# db = DatabaseManager("/tmp/recipe_app.db")
 
 def generate_token(user_data):
     payload = {

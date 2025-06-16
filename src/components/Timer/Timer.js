@@ -125,6 +125,9 @@ export default function Timer({ setShowTimer }) {
   //  DRAG HANDLERS
   // --------------------
   const handleMouseDown = (e) => {
+    // Prevent drag if the target is the close button or inside it
+    if (e.target.closest('.timer-close')) return;
+
     setIsDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
     setDragOffset({
