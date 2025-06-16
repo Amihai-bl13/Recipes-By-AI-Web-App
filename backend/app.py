@@ -19,10 +19,6 @@ from database.models import DatabaseManager
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Used for session encryption
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-
-if not JWT_SECRET_KEY:
-    raise ValueError("JWT_SECRET_KEY is not set in environment variables")
 
 # Run Locally:
 # CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
@@ -44,6 +40,10 @@ load_dotenv()
 # Environment variables
 GOOGLE_CLIENT_ID    = os.getenv("GOOGLE_CLIENT_ID")
 OPENROUTER_API_KEY  = os.getenv("OPENROUTER_API_KEY")  # get yours at https://openrouter.ai
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+if not JWT_SECRET_KEY:
+    raise ValueError("JWT_SECRET_KEY is not set in environment variables")
 
 # Initialize database with new path (recipe-app/database instead of recipe-app/backend/database)
 # For local development:
@@ -72,6 +72,17 @@ def verify_token(token):
 def require_auth(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # Allow CORS preflight through without auth
+        if request.method == 'OPTIONS':
+            resp = make_response(("", 200))
+            # echo back the CORS headers so browser sees them
+            origin = request.headers.get('Origin')
+            if origin == 'https://recipes-by-ai-web-app-front.onrender.com':
+                resp.headers['Access-Control-Allow-Origin'] = origin
+                resp.headers['Access-Control-Allow-Credentials'] = 'true'
+                resp.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+                resp.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
+            return resp
         token = request.headers.get('Authorization')
         if not token:
             return jsonify({"error": "No token provided"}), 401
@@ -190,7 +201,7 @@ def suggest_recipe():
     if request.method == "OPTIONS":
         return make_response(("", 200))
 
-    user_id = session.get("user_id")
+    user_id = request.current_user["user_id"]
     if not user_id:
         return jsonify({"error": "Not logged in"}), 401
 
@@ -268,7 +279,7 @@ def suggest_recipe():
 @app.route("/favorites", methods=["GET", "POST", "DELETE"])
 @require_auth
 def manage_favorites():
-    user_id = session.get("user_id")
+    user_id = request.current_user["user_id"]
     if not user_id:
         return jsonify({"error": "Not logged in"}), 401
     
@@ -324,7 +335,7 @@ def manage_favorites():
 @require_auth
 def clear_conversation_history():
     """Clear conversation history for the current user (except system messages)"""
-    user_id = session.get("user_id")
+    user_id = request.current_user["user_id"]
     if not user_id:
         return jsonify({"error": "Not logged in"}), 401
     

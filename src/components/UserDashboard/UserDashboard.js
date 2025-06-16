@@ -253,7 +253,7 @@ export default function UserDashboard({
 
       {showHistoryConfirm && (
         <StylishConfirm
-          message="Are you sure you want to clear your chat history? This will delete all past messages."
+          message="This action will delete all past messages."
           onConfirm={handleConfirmClearHistory}
           onCancel={() => setShowHistoryConfirm(false)}
         />
