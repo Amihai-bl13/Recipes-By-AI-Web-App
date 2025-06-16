@@ -46,6 +46,7 @@ function App() {
   const [showTimer, setShowTimer] = useState(false);
 
   const [loginMessage, setLoginMessage] = useState(null);
+  const [hasFetchedUser, setHasFetchedUser] = useState(false);
 
   // --------------------
   //  AUTH / USER FETCH
@@ -113,12 +114,16 @@ function App() {
 
       setAuthToken(jwtToken);
 
+      // Set default auth header manually again (in case component reload happens)
+      axios.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`;
+
       if (needsTerms) {
         setPendingUser(userData);
         setShowTerms(true);
       } else {
         setUser(userData);
         setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
+        setHasFetchedUser(true); // ✅ Prevent double-fetching
       }
 
     } catch (error) {
@@ -168,14 +173,13 @@ function App() {
   const handleLogout = async () => {
     try {
       await axios.post(`${API_URL}/logout`);
-      setAuthToken(null);  // Clear JWT token
-      setUser(null);
       setRecipe('');
       setPrompt('');
     } catch (error) {
       console.error('Logout error:', error);
-      // Even if logout fails, clear local token
-      setAuthToken(null);
+    } finally{
+      setHasFetchedUser(false);
+      setAuthToken(null); // Clear JWT token
       setUser(null);
     }
   };
@@ -194,12 +198,13 @@ function App() {
   // --------------------
   useEffect(() => {
     const token = getAuthToken();
-    if (token) {
+    if (token && !hasFetchedUser) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      fetchUser().then(() => setHasFetchedUser(true));
     }
-    fetchUser();
+
     document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+  }, [theme, hasFetchedUser]);
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
