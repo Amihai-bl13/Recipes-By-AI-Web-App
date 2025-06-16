@@ -11,10 +11,12 @@ export default function LoginArea({ handleLoginSuccess }) {
         <p className="login-subtitle">
           Sign in to discover amazing recipes tailored just for you ✨
         </p>
-        <GoogleLogin
-          onSuccess={handleLoginSuccess}
-          onError={() => console.error('Login failed')}
-        />
+        <div className="google-login-wrapper">
+          <GoogleLogin
+            onSuccess={handleLoginSuccess}
+            onError={() => console.error('Login failed')}
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,9 +1,7 @@
-/* Header.css */
-
 .header {
   text-align: center;
   position: relative;
-  min-height: 120px;
+  min-height: 200px;
 }
 
 .logo {
@@ -11,7 +9,6 @@
   font-size: 2.5rem;
   font-weight: 700;
   color: white;
-  margin-bottom: 8px;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   position: relative;
 }
@@ -40,8 +37,7 @@
   display: flex;
   align-items: center;
   justify-content: right;
-  gap: 15px;
-  margin-top: 5px;
+  gap: 10px;
   z-index: 5;
 }
 
@@ -97,4 +93,70 @@
 .timer-toggle-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: scale(1.1);
+}
+
+
+@media (max-width: 768px) {
+  .header {
+    min-height: 140px;
+    padding: 20px 0;
+  }
+  
+  .logo {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+  
+  .tagline {
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }
+  
+  .header-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+  }
+  
+  .theme-btn,
+  .timer-toggle-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+  
+  .logout-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    min-height: 120px;
+  }
+  
+  .logo {
+    font-size: 1.8rem;
+  }
+  
+  .tagline {
+    font-size: 0.8rem;
+  }
+  
+  .header-controls {
+    gap: 6px;
+  }
+  
+  .theme-btn,
+  .timer-toggle-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .logout-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
 }

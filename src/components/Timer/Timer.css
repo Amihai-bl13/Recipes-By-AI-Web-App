@@ -184,3 +184,93 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+
+@media (max-width: 768px) {
+  .floating-timer {
+    position: fixed;
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    left: 20px;
+    min-width: auto;
+    width: auto;
+    padding: 15px;
+    border-radius: 12px;
+  }
+  
+  .timer-header {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    margin-right: 0;
+    text-align: center;
+  }
+  
+  .timer-close {
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+  }
+  
+  .time-inputs {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  
+  .time-inputs input {
+    width: 50px;
+    padding: 6px;
+    font-size: 0.85rem;
+  }
+  
+  .time-inputs span {
+    font-size: 1rem;
+  }
+  
+  .timer-start-btn,
+  .timer-reset-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+  
+  .timer-time {
+    font-size: 2rem;
+    margin-bottom: 12px;
+  }
+  
+  .timer-controls {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  
+  .timer-controls button {
+    padding: 6px 10px;
+    font-size: 1.1rem;
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-timer {
+    bottom: 15px;
+    right: 15px;
+    left: 15px;
+    padding: 12px;
+  }
+  
+  .timer-time {
+    font-size: 1.8rem;
+  }
+  
+  .time-inputs input {
+    width: 45px;
+    padding: 5px;
+    font-size: 0.8rem;
+  }
+  
+  .timer-start-btn,
+  .timer-reset-btn {
+    padding: 7px 14px;
+    font-size: 0.85rem;
+  }
+}
