@@ -8,6 +8,8 @@ import requests
 from datetime import datetime
 import traceback
 import sys
+import jwt
+from functools import wraps
 
 # Add the parent directory to the path to import database module
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,6 +18,7 @@ from database.models import DatabaseManager
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Used for session encryption
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
 # Run Locally:
 # CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
@@ -44,6 +47,45 @@ OPENROUTER_API_KEY  = os.getenv("OPENROUTER_API_KEY")  # get yours at https://op
 # for production:
 db = DatabaseManager("/tmp/recipe_app.db")
 
+def generate_token(user_data):
+    payload = {
+        "user_id": user_data["id"],
+        "google_id": user_data.get("google_id", ""),
+        "email": user_data["email"],
+        "exp": datetime.utcnow() + timedelta(days=7)  # Token expires in 7 days
+    }
+    return jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
+
+def verify_token(token):
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+
+def require_auth(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({"error": "No token provided"}), 401
+        
+        if token.startswith('Bearer '):
+            token = token[7:]
+        
+        payload = verify_token(token)
+        if not payload:
+            return jsonify({"error": "Invalid or expired token"}), 401
+        
+        # Add user info to request context
+        request.current_user = payload
+        return f(*args, **kwargs)
+    
+    return decorated_function
+
+
 @app.after_request
 def after_request(response):
     # More permissive CORS for mobile browsers
@@ -57,7 +99,7 @@ def after_request(response):
 
 @app.route("/login/google", methods=["POST"])
 def login_with_google():
-    data  = request.json or {}
+    data = request.json or {}
     token = data.get("token")
 
     try:
@@ -74,22 +116,22 @@ def login_with_google():
 
         # Create or update user in database
         user = db.create_or_update_user(google_id, email, name, picture)
-
-        # Save user in session
-        session["user_id"] = user["id"]
-        session["google_id"] = google_id
-
-        # Check if user needs to accept terms (new user OR existing user who hasn't accepted)
+        
+        # Generate JWT token instead of session
+        jwt_token = generate_token(user)
+        
+        # Check if user needs to accept terms
         needs_terms = user.get("is_new_user", False) or not user.get("terms_accepted", False)
 
         return jsonify({
-            "message": "Login successful", 
+            "message": "Login successful",
+            "token": jwt_token,  # Send JWT token to frontend
             "user": {
                 "email": user["email"],
                 "name": user["name"],
                 "picture": user["picture"]
             },
-            "isNewUser": needs_terms  # This will be true for new users OR users who haven't accepted terms
+            "isNewUser": needs_terms
         })
     except Exception as e:
         print("Google login error:")
@@ -98,23 +140,19 @@ def login_with_google():
 
 @app.route("/logout", methods=["POST"])
 def logout():
-    session.pop("user_id", None)
-    session.pop("google_id", None)
+    # With JWT, logout is handled client-side by removing the token
     return jsonify({"message": "Logged out successfully"})
 
 @app.route("/me", methods=["GET"])
+@require_auth
 def me():
-    user_id = session.get("user_id")
-    google_id = session.get("google_id")
-    
-    if not user_id or not google_id:
-        return jsonify({"error": "Not logged in"}), 401
+    user_id = request.current_user["user_id"]
+    google_id = request.current_user["google_id"]
     
     user = db.get_user_by_google_id(google_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    # Check if user has accepted terms
     if not user.get("terms_accepted", False):
         return jsonify({"error": "Terms not accepted"}), 403
     
@@ -125,11 +163,9 @@ def me():
     })
 
 @app.route("/accept-terms", methods=["POST"])
+@require_auth
 def accept_terms():
-    user_id = session.get("user_id")
-    if not user_id:
-        return jsonify({"error": "Not logged in"}), 401
-    
+    user_id = request.current_user["user_id"]
     try:
         success = db.accept_terms(user_id)
         if success:
@@ -142,6 +178,7 @@ def accept_terms():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/suggest_recipe", methods=["POST", "OPTIONS"])
+@require_auth
 def suggest_recipe():
     # Preflight CORS
     if request.method == "OPTIONS":
@@ -223,6 +260,7 @@ def suggest_recipe():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/favorites", methods=["GET", "POST", "DELETE"])
+@require_auth
 def manage_favorites():
     user_id = session.get("user_id")
     if not user_id:
@@ -277,6 +315,7 @@ def manage_favorites():
             return jsonify({"error": str(e)}), 500
 
 @app.route("/clear_history", methods=["POST"])
+@require_auth
 def clear_conversation_history():
     """Clear conversation history for the current user (except system messages)"""
     user_id = session.get("user_id")

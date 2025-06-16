@@ -50,12 +50,34 @@ function App() {
   // --------------------
   const fetchUser = async () => {
     try {
-      const res = await axios.get(`${API_URL}/me`, { withCredentials: true });
+      const token = getAuthToken();
+      if (!token) return;
+      
+      const res = await axios.get(`${API_URL}/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setUser(res.data);
       setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
     } catch (error) {
-      // not logged in
+      // Token invalid or expired, clear it
+      setAuthToken(null);
+      setUser(null);
     }
+  };
+
+  const setAuthToken = (token) => {
+    if (token) {
+      localStorage.setItem('authToken', token);
+      // Set default axios header for all requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      localStorage.removeItem('authToken');
+      delete axios.defaults.headers.common['Authorization'];
+    }
+  };
+
+  const getAuthToken = () => {
+    return localStorage.getItem('authToken');
   };
 
   const handleLoginSuccess = async (credentialResponse) => {
@@ -63,19 +85,21 @@ function App() {
     try {
       const res = await axios.post(
         `${API_URL}/login/google`,
-        { token },
-        { withCredentials: true }
+        { token }
+        // Remove withCredentials since we're not using cookies anymore
       );
       
       const userData = res.data.user;
-      const needsTerms = res.data.isNewUser; // This now covers both new users and users who haven't accepted terms
+      const jwtToken = res.data.token;  // Get JWT token from response
+      const needsTerms = res.data.isNewUser;
+      
+      // Store JWT token
+      setAuthToken(jwtToken);
       
       if (needsTerms) {
-        // Show terms for users who need to accept them
         setPendingUser(userData);
         setShowTerms(true);
       } else {
-        // User has already accepted terms - proceed normally
         setUser(userData);
         setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
       }
@@ -91,7 +115,7 @@ function App() {
       setPendingUser(null);
       setShowTerms(false);
       setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
-      
+
       // Mark terms as accepted in backend
       await axios.post(`${API_URL}/accept-terms`, {}, { withCredentials: true });
     } catch (error) {
@@ -115,12 +139,16 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
+      await axios.post(`${API_URL}/logout`);
+      setAuthToken(null);  // Clear JWT token
       setUser(null);
       setRecipe('');
       setPrompt('');
     } catch (error) {
       console.error('Logout error:', error);
+      // Even if logout fails, clear local token
+      setAuthToken(null);
+      setUser(null);
     }
   };
 
@@ -137,6 +165,10 @@ function App() {
   //  INITIAL EFFECTS
   // --------------------
   useEffect(() => {
+    const token = getAuthToken();
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
     fetchUser();
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);

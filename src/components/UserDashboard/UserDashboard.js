@@ -50,7 +50,7 @@ export default function UserDashboard({
       const res = await axios.post(
         `${API_URL}/suggest_recipe`,
         { message: prompt },
-        { withCredentials: true }
+        // { withCredentials: true }
       );
       setRecipe(res.data.recipe);
       setPrompt('');
@@ -68,7 +68,7 @@ export default function UserDashboard({
 
   const fetchFavorites = async () => {
     try {
-      const res = await axios.get(`${API_URL}/favorites`, { withCredentials: true });
+      const res = await axios.get(`${API_URL}/favorites`);
       setFavorites(res.data.favorites || []);
     } catch (error) {
       console.error('Error fetching favorites:', error);
@@ -115,7 +115,7 @@ export default function UserDashboard({
       await axios.post(
         `${API_URL}/favorites`,
         { recipe, title },
-        { withCredentials: true }
+        // { withCredentials: true }
       );
       setAlertMessage('Recipe starred successfully!');
       fetchFavorites();
@@ -129,7 +129,8 @@ export default function UserDashboard({
     try {
       await axios.delete(
         `${API_URL}/favorites`,
-        { data: { recipe_id: recipeId }, withCredentials: true }
+        { data: { recipe_id: recipeId } }
+        // Remove: withCredentials: true
       );
       setSelectedRecipe(null);
       fetchFavorites();
@@ -140,7 +141,7 @@ export default function UserDashboard({
 
   const handleConfirmClearHistory = async () => {
     try {
-      await axios.post(`${API_URL}/clear_history`, {}, { withCredentials: true });
+      await axios.post(`${API_URL}/clear_history`, {});
       setAlertMessage("Conversation history cleared.");
       setRecipe('');
       setPrompt('');
