@@ -86,14 +86,14 @@ function App() {
 
   const handleTermsAccept = async () => {
     try {
-      // Mark terms as accepted in backend
-      await axios.post(`${API_URL}/accept-terms`, {}, { withCredentials: true });
-      
       // Set the user and hide terms
       setUser(pendingUser);
       setPendingUser(null);
       setShowTerms(false);
       setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
+      
+      // Mark terms as accepted in backend
+      await axios.post(`${API_URL}/accept-terms`, {}, { withCredentials: true });
     } catch (error) {
       console.error('Error accepting terms:', error);
     }

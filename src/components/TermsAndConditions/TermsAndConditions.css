@@ -111,6 +111,11 @@
   transition: all 0.2s ease;
 }
 
+.btn-accept,
+.btn-decline {
+  touch-action: manipulation;
+}
+
 .btn-decline {
   background: rgb(166, 166, 166);
   color: var(--text-primary);
