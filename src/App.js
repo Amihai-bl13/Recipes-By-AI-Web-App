@@ -99,6 +99,10 @@ function App() {
     }
   };
 
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   const handleLoginSuccess = async (credentialResponse) => {
     const token = credentialResponse.credential;
 
@@ -111,7 +115,12 @@ function App() {
     }
 
     setLoading(true);
-    if(!backendReady) return;
+    while (!backendReady) {
+      backendReady = await pingBackend();
+      if (!backendReady) {
+        await delay(30000); //wait 30 seconds before retrying
+      }
+    }
 
     try {
       const res = await axios.post(`${API_URL}/login/google`, { token });
@@ -271,7 +280,7 @@ function App() {
       {loading && (
         <LoadingOverlay
           text={loginMessage || "Crafting your perfect recipe..."}
-          subtext={loginMessage ? "This may take up to 30 seconds." : "This may take a moment"}
+          subtext={loginMessage ? "This may take up to 1 min." : "This may take a moment"}
         />
       )}
     </GoogleOAuthProvider>
