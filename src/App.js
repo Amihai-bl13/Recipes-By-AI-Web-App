@@ -55,16 +55,23 @@ function App() {
     try {
       const token = getAuthToken();
       if (!token) return;
-      
-      const res = await axios.get(`${API_URL}/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+
+      const res = await axios.get(`${API_URL}/me`);
       setUser(res.data);
-      setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
+      setPlaceholder("Tell me what ingredients you have…");
     } catch (error) {
-      // Token invalid or expired, clear it
-      setAuthToken(null);
-      setUser(null);
+      const status = error.response?.status;
+      if (status === 401) {
+        // real “you’re not logged in” case
+        setAuthToken(null);
+        setUser(null);
+      } else if (status === 403) {
+        // terms not accepted → show the modal, but keep your token
+        setShowTerms(true);
+      } else {
+        // network glitch, CORS hiccup, etc.—don’t blow everything away
+        console.warn("Could not fetch /me:", error);
+      }
     }
   };
 
@@ -199,14 +206,13 @@ function App() {
   // --------------------
   useEffect(() => {
     const token = getAuthToken();
-    if (token && !hasFetchedUser) {
+    if (token && !hasFetchedUser && !showTerms) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       fetchUser().then(() => setHasFetchedUser(true));
     }
-
     document.documentElement.setAttribute('data-theme', theme);
-  }, [theme, hasFetchedUser]);
-
+  }, [theme, hasFetchedUser, showTerms]);
+  
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <FloatingShapes />
