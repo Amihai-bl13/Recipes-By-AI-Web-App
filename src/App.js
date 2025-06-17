@@ -113,7 +113,7 @@ function App() {
       setLoginMessage("Please stand by... the website is restarting itself and will be available shortly.");
 
       while (!backendReady) {
-        await delay(50000);
+        await delay(5000);
         backendReady = await pingBackend();
       }
     }
@@ -128,17 +128,16 @@ function App() {
       const needsTerms = res.data.isNewUser;
 
       setAuthToken(jwtToken);
-
-      // Set default auth header manually again (in case component reload happens)
       axios.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`;
 
       if (needsTerms) {
         setPendingUser(userData);
         setShowTerms(true);
+        setHasFetchedUser(true);    // ← mark as fetched so /me won’t run again
       } else {
         setUser(userData);
         setPlaceholder("Tell me what ingredients you have, or describe the dish you're craving... ✨");
-        setHasFetchedUser(true); // ✅ Prevent double-fetching
+        setHasFetchedUser(true);
       }
 
     } catch (error) {
