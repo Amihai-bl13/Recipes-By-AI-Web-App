@@ -106,21 +106,19 @@ function App() {
   const handleLoginSuccess = async (credentialResponse) => {
     const token = credentialResponse.credential;
 
-    const backendReady = await pingBackend();
+    let backendReady = await pingBackend();
 
     if (!backendReady) {
+      setLoading(true);
       setLoginMessage("Please stand by... the website is restarting itself and will be available shortly.");
-    } else {
-      setLoginMessage("Logging you in...");
-    }
 
-    setLoading(true);
-    while (!backendReady) {
-      backendReady = await pingBackend();
-      if (!backendReady) {
-        await delay(30000); //wait 30 seconds before retrying
+      while (!backendReady) {
+        await delay(50000);
+        backendReady = await pingBackend();
       }
     }
+
+    setLoginMessage("Logging you in…");
 
     try {
       const res = await axios.post(`${API_URL}/login/google`, { token });
