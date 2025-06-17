@@ -104,6 +104,7 @@ function App() {
     }
 
     setLoading(true);
+    if(!backendReady) return;
 
     try {
       const res = await axios.post(`${API_URL}/login/google`, { token });
